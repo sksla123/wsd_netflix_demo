@@ -14,9 +14,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '23.2'
     - name: Install dependencies
@@ -33,37 +33,37 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist/your-project-name
     
     - name: Create GitHub Deployment
       id: deployment
-      uses: chrnorm/deployment-action@v2
+      uses: chrnorm/deployment-action@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         environment: production
         initial-status: success
-        environment-url: https://${{ github.repository_owner }}.github.io/wsd_netflix_clone
+        environment-url: https://${{ github.repository_owner }}.github.io/wsd_netflix_demo
 
     - name: Update Deployment Status
-      uses: chrnorm/deployment-status@v2
+      uses: chrnorm/deployment-status@v4
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         deployment-id: ${{ steps.deployment.outputs.deployment_id }}
         state: ${{ job.status }}
-        environment-url: https://${{ github.repository_owner }}.github.io/wsd_netflix_clone
+        environment-url: https://${{ github.repository_owner }}.github.io/wsd_netflix_demo
 
     - name: Add deployment URL to summary
       run: |
         echo "## Deployment URL" >> $GITHUB_STEP_SUMMARY
-        echo "The app was deployed to: https://${{ github.repository_owner }}.github.io/wsd_netflix_clone" >> $GITHUB_STEP_SUMMARY
+        echo "The app was deployed to: https://${{ github.repository_owner }}.github.io/wsd_netflix_demo" >> $GITHUB_STEP_SUMMARY
