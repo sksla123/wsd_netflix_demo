@@ -47,7 +47,7 @@ jobs:
     
     - name: Create GitHub Deployment
       id: deployment
-      uses: chrnorm/deployment-action@v3
+      uses: chrnorm/deployment-action@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         environment: production
@@ -55,7 +55,7 @@ jobs:
         environment-url: https://${{ github.repository_owner }}.github.io/wsd_netflix_demo
 
     - name: Update Deployment Status
-      uses: chrnorm/deployment-status@v3
+      uses: chrnorm/deployment-status@v2
       if: always()
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
