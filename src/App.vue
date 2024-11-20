@@ -1,22 +1,17 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
+  <div><p>hello, world!</p></div>
   <div id="app">
     <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/login">Login</router-link>
+      <RouterLink to="/">Home</RouterLink> |
+      <RouterLink to="/login">Login</RouterLink>
     </nav>
-    <router-view></router-view>
+    <RouterView />
   </div>
 </template>
-
-<script>
-export default {
-  name: 'App'
-}
-</script>
 
 <style>
 #app {
@@ -37,11 +32,7 @@ nav a {
   color: #2c3e50;
 }
 
-nav a.router-link-exact-active {
+nav a.router-link-active {
   color: #42b983;
 }
-</style>
-
-<style scoped>
-
 </style>
