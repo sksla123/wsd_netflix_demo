@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
 import profileIcon from './assets/profile.png';
 
@@ -7,6 +7,7 @@ const showMenu = ref(false);
 const showProfile = ref(false);
 const userEmail = ref('user@example.com');
 const isLoggedIn = ref(false);
+const isMobile = ref(window.innerWidth <= 768);
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -37,12 +38,27 @@ const closeDropdowns = (event) => {
   }
 };
 
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+  if (!isMobile.value) {
+    showMenu.value = false;
+  }
+};
+
 onMounted(() => {
   document.addEventListener('click', closeDropdowns);
+  window.addEventListener('resize', handleResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdowns);
+  window.removeEventListener('resize', handleResize);
+});
+
+watch(isMobile, (newValue) => {
+  if (!newValue) {
+    showMenu.value = false;
+  }
 });
 </script>
 
@@ -78,7 +94,7 @@ onUnmounted(() => {
       </div>
       <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
-    <div v-show="showMenu" class="mobile-nav">
+    <div :class="['mobile-nav', { 'show': showMenu }]">
       <div class="mobile-profile">
         <template v-if="isLoggedIn">
           <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
@@ -212,13 +228,19 @@ onUnmounted(() => {
 }
 
 .mobile-nav {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100vh;
   background: #141414;
   padding: 20px;
   z-index: 1000;
+  transition: right 0.3s ease;
+}
+
+.mobile-nav.show {
+  right: 0;
 }
 
 .mobile-nav a {
@@ -246,11 +268,6 @@ onUnmounted(() => {
 
   .profile-pic {
     display: none;
-  }
-
-  .mobile-nav {
-    display: flex;
-    flex-direction: column;
   }
 
   .profile-dropdown {
