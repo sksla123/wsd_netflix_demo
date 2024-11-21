@@ -230,7 +230,7 @@ watch(isMobile, (newValue) => {
 .mobile-nav {
   position: fixed;
   top: 0;
-  right: -300px;
+  right: -10000px;
   width: 300px;
   height: 100vh;
   background: #141414;
