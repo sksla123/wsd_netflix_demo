@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import profileIcon from './assets/profile.png';
 
+const router = useRouter();
 const showMenu = ref(false);
 const showProfile = ref(false);
 const userEmail = ref('user@example.com');
@@ -25,10 +26,7 @@ const logout = () => {
 };
 
 const login = () => {
-  isLoggedIn.value = true;
-  showProfile.value = false;
-  showMenu.value = false;
-  console.log('Logged in');
+  router.push('/login');
 };
 
 const closeDropdowns = (event) => {
@@ -71,9 +69,9 @@ watch(isMobile, (newValue) => {
       </RouterLink>
       <nav class="desktop-nav">
         <RouterLink to="/">홈</RouterLink>
-        <RouterLink to="/trending">지금 뜨는 콘텐츠</RouterLink>
+        <RouterLink to="/trend">지금 뜨는 콘텐츠</RouterLink>
         <RouterLink to="/browse">찾아보기</RouterLink>
-        <RouterLink to="/my-list">내가 찜한 리스트</RouterLink>
+        <RouterLink to="/mylist">내가 찜한 리스트</RouterLink>
       </nav>
     </div>
     <div class="header-right">
@@ -89,7 +87,7 @@ watch(isMobile, (newValue) => {
           </template>
           <template v-else>
             <p>로그인 해주세요</p>
-            <RouterLink to="/login" class="login-button">로그인</RouterLink>
+            <button @click="login" class="login-button">로그인</button>
           </template>
         </div>
       </div>
@@ -105,14 +103,14 @@ watch(isMobile, (newValue) => {
       </template>
       <template v-else>
         <p>로그인 해주세요</p>
-        <RouterLink to="/login" class="login-button">로그인</RouterLink>
+        <button @click="login" class="login-button">로그인</button>
       </template>
     </div>
     <nav>
       <RouterLink to="/">홈</RouterLink>
-      <RouterLink to="/trending">지금 뜨는 콘텐츠</RouterLink>
+      <RouterLink to="/trend">지금 뜨는 콘텐츠</RouterLink>
       <RouterLink to="/browse">찾아보기</RouterLink>
-      <RouterLink to="/my-list">내가 찜한 리스트</RouterLink>
+      <RouterLink to="/mylist">내가 찜한 리스트</RouterLink>
     </nav>
   </div>
   <RouterView />
