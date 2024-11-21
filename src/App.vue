@@ -229,13 +229,13 @@ watch(isMobile, (newValue) => {
 
 .mobile-nav {
   position: fixed;
-  top: 0;
+  top: 60px;
   right: -10000px;
   width: 300px;
-  height: 100vh;
+  height: calc(100vh - 60px);
   background: #141414;
   padding: 20px;
-  z-index: 1000;
+  z-index: 999;
   transition: right 0.3s ease;
   overflow-y: auto;
 }
