@@ -4,13 +4,11 @@
     <meta charset="utf-8">
     <title>Page Not Found</title>
     <script type="text/javascript">
-        var pathSegmentsToKeep = 1; // 필요한 경우 조정하세요
-
         var l = window.location;
         l.replace(
             l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            l.pathname.split('/').slice(0, 1).join('/') + '/?/' +
+            l.pathname.slice(1).replace(/&/g, '~and~') +
             (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
             (l.hash ? l.hash : '') // 해시 부분을 추가합니다.
         );
