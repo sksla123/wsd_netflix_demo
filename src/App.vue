@@ -284,7 +284,7 @@ watch(isMobile, (newValue) => {
 
 @media (max-width: 480px) {
   .mobile-nav {
-    width: 100%;
+    width: 80%;
   }
 }
 </style>
