@@ -56,7 +56,8 @@ onUnmounted(() => {
 });
 
 watch(isMobile, (newValue) => {
-  if (!newValue) {
+  if (newValue) {
+    showProfile.value = false;
     showMenu.value = false;
   }
 });
@@ -80,7 +81,7 @@ watch(isMobile, (newValue) => {
         <div class="profile-pic" @click.stop="toggleProfile">
           <img :src="profileIcon" alt="프로필" class="profile-icon">
         </div>
-        <div v-show="showProfile" class="profile-dropdown">
+        <div v-show="showProfile && !isMobile" class="profile-dropdown">
           <template v-if="isLoggedIn">
             <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
             <p>{{ userEmail }}</p>
@@ -272,10 +273,7 @@ watch(isMobile, (newValue) => {
   }
 
   .profile-dropdown {
-    width: 100%;
-    right: 0;
-    left: 0;
-    top: 100%;
+    display: none;
   }
 }
 </style>
