@@ -122,7 +122,8 @@ watch(isMobile, (newValue) => {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background: #141414;
+  /* background: #141414; */
+  background:transparent;
   position: relative;
   z-index: 1000;
 }
