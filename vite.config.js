@@ -8,5 +8,6 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 4200
   },
-  base: "/wsd_netflix_demo/"
+  base: "/wsd_netflix_demo/",
+  assetsInclude: ['**/*.svg'],
 })
