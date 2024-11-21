@@ -66,14 +66,14 @@ watch(isMobile, (newValue) => {
 <template>
   <header class="responsive-header">
     <div class="header-left">
-      <a href="#" class="logo">
+      <RouterLink to="/" class="logo">
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
-      </a>
+      </RouterLink>
       <nav class="desktop-nav">
-        <a href="#">홈</a>
-        <a href="#">지금 뜨는 콘텐츠</a>
-        <a href="#">찾아보기</a>
-        <a href="#">내가 찜한 리스트</a>
+        <RouterLink to="/">홈</RouterLink>
+        <RouterLink to="/trending">지금 뜨는 콘텐츠</RouterLink>
+        <RouterLink to="/browse">찾아보기</RouterLink>
+        <RouterLink to="/my-list">내가 찜한 리스트</RouterLink>
       </nav>
     </div>
     <div class="header-right">
@@ -89,7 +89,7 @@ watch(isMobile, (newValue) => {
           </template>
           <template v-else>
             <p>로그인 해주세요</p>
-            <button @click="login" class="login-button">로그인</button>
+            <RouterLink to="/login" class="login-button">로그인</RouterLink>
           </template>
         </div>
       </div>
@@ -105,17 +105,17 @@ watch(isMobile, (newValue) => {
       </template>
       <template v-else>
         <p>로그인 해주세요</p>
-        <button @click="login" class="login-button">로그인</button>
+        <RouterLink to="/login" class="login-button">로그인</RouterLink>
       </template>
     </div>
     <nav>
-      <a href="#">홈</a>
-      <a href="#">지금 뜨는 콘텐츠</a>
-      <a href="#">찾아보기</a>
-      <a href="#">내가 찜한 리스트</a>
+      <RouterLink to="/">홈</RouterLink>
+      <RouterLink to="/trending">지금 뜨는 콘텐츠</RouterLink>
+      <RouterLink to="/browse">찾아보기</RouterLink>
+      <RouterLink to="/my-list">내가 찜한 리스트</RouterLink>
     </nav>
   </div>
-  <router-view></router-view>
+  <RouterView />
 </template>
 
 <style scoped>
