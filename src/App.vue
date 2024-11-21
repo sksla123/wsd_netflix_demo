@@ -116,6 +116,14 @@ watch(isMobile, (newValue) => {
   <RouterView />
 </template>
 
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #2B2B2B; /* 짙은 회색 배경 */
+}
+</style>
+
 <style scoped>
 .responsive-header {
   display: flex;
@@ -267,7 +275,7 @@ watch(isMobile, (newValue) => {
   .responsive-header {
     background: #141414; /* 모바일에서 검은색 배경 */
   }
-  
+
   .desktop-nav {
     display: none;
   }
