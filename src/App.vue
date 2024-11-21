@@ -9,6 +9,7 @@ const showProfile = ref(false);
 const userEmail = ref('user@example.com');
 const isLoggedIn = ref(false);
 const isMobile = ref(window.innerWidth <= 768);
+const isHeaderHovered = ref(false);
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -43,6 +44,12 @@ const handleResize = () => {
   }
 };
 
+const handleHeaderHover = (isHovered) => {
+  if (!isMobile.value) {
+    isHeaderHovered.value = isHovered;
+  }
+};
+
 onMounted(() => {
   document.addEventListener('click', closeDropdowns);
   window.addEventListener('resize', handleResize);
@@ -62,7 +69,12 @@ watch(isMobile, (newValue) => {
 </script>
 
 <template>
-  <header class="responsive-header">
+  <header 
+    class="responsive-header" 
+    :class="{ 'header-hovered': isHeaderHovered }"
+    @mouseenter="handleHeaderHover(true)"
+    @mouseleave="handleHeaderHover(false)"
+  >
     <div class="header-left">
       <RouterLink to="/" class="logo">
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
@@ -113,14 +125,16 @@ watch(isMobile, (newValue) => {
       <RouterLink to="/mylist">내가 찜한 리스트</RouterLink>
     </nav>
   </div>
-  <RouterView />
+  <main class="main-content">
+    <RouterView />
+  </main>
 </template>
 
 <style>
 body {
   margin: 0;
   padding: 0;
-  background-color: #2B2B2B; /* 짙은 회색 배경 */
+  background-color: #2B2B2B;
 }
 </style>
 
@@ -130,10 +144,17 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  /* background: #141414; */
-  background:transparent;
-  position: relative;
+  background: transparent;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+.header-hovered {
+  background-color: #141414;
 }
 
 .header-left {
@@ -226,8 +247,8 @@ body {
   cursor: pointer;
   font-size: 14px;
   margin-top: 10px;
-  width: 100px;  /* 버튼 너비 고정 */
-  height: 40px;  /* 버튼 높이 고정 */
+  width: 100px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -271,9 +292,13 @@ body {
   text-align: center;
 }
 
+.main-content {
+  padding-top: 0px; /* 헤더의 높이에 맞게 조정하세요 */
+}
+
 @media (max-width: 768px) {
   .responsive-header {
-    background: #141414; /* 모바일에서 검은색 배경 */
+    background: #141414;
   }
 
   .desktop-nav {
@@ -298,8 +323,8 @@ body {
   }
 
   .login-button, .logout-button {
-    width: 100px;  /* 모바일에서도 버튼 너비 고정 */
-    height: 40px;  /* 모바일에서도 버튼 높이 고정 */
+    width: 100px;
+    height: 40px;
   }
 }
 
