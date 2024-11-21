@@ -9,7 +9,6 @@ const showProfile = ref(false);
 const userEmail = ref('user@example.com');
 const isLoggedIn = ref(false);
 const isMobile = ref(window.innerWidth <= 768);
-const isHeaderHovered = ref(false);
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -63,12 +62,7 @@ watch(isMobile, (newValue) => {
 </script>
 
 <template>
-  <header 
-    class="responsive-header" 
-    :class="{ 'header-hovered': isHeaderHovered }"
-    @mouseenter="isHeaderHovered = true"
-    @mouseleave="isHeaderHovered = false"
-  >
+  <header class="responsive-header">
     <div class="header-left">
       <RouterLink to="/" class="logo">
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
@@ -128,17 +122,9 @@ watch(isMobile, (newValue) => {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  background: #141414;
+  position: relative;
   z-index: 1000;
-  transition: background-color 0.3s ease;
-}
-
-.header-hovered {
-  background-color: #141414;
 }
 
 .header-left {
@@ -231,7 +217,11 @@ watch(isMobile, (newValue) => {
   cursor: pointer;
   font-size: 14px;
   margin-top: 10px;
-  width: 100px;
+  width: 100px;  /* 버튼 너비 고정 */
+  height: 40px;  /* 버튼 높이 고정 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .mobile-menu {
@@ -273,10 +263,6 @@ watch(isMobile, (newValue) => {
 }
 
 @media (max-width: 768px) {
-  .responsive-header {
-    background: #141414;
-  }
-
   .desktop-nav {
     display: none;
   }
@@ -299,7 +285,8 @@ watch(isMobile, (newValue) => {
   }
 
   .login-button, .logout-button {
-    width: 100px;
+    width: 100px;  /* 모바일에서도 버튼 너비 고정 */
+    height: 40px;  /* 모바일에서도 버튼 높이 고정 */
   }
 }
 
