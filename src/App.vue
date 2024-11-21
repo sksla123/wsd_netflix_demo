@@ -94,26 +94,26 @@ watch(isMobile, (newValue) => {
       </div>
       <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
-    <div :class="['mobile-nav', { 'show': showMenu }]">
-      <div class="mobile-profile">
-        <template v-if="isLoggedIn">
-          <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
-          <p>{{ userEmail }}</p>
-          <button @click="logout" class="logout-button">로그아웃</button>
-        </template>
-        <template v-else>
-          <p>로그인 해주세요</p>
-          <button @click="login" class="login-button">로그인</button>
-        </template>
-      </div>
-      <nav>
-        <a href="#">홈</a>
-        <a href="#">지금 뜨는 콘텐츠</a>
-        <a href="#">찾아보기</a>
-        <a href="#">내가 찜한 리스트</a>
-      </nav>
-    </div>
   </header>
+  <div :class="['mobile-nav', { 'show': showMenu }]">
+    <div class="mobile-profile">
+      <template v-if="isLoggedIn">
+        <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
+        <p>{{ userEmail }}</p>
+        <button @click="logout" class="logout-button">로그아웃</button>
+      </template>
+      <template v-else>
+        <p>로그인 해주세요</p>
+        <button @click="login" class="login-button">로그인</button>
+      </template>
+    </div>
+    <nav>
+      <a href="#">홈</a>
+      <a href="#">지금 뜨는 콘텐츠</a>
+      <a href="#">찾아보기</a>
+      <a href="#">내가 찜한 리스트</a>
+    </nav>
+  </div>
   <router-view></router-view>
 </template>
 
@@ -237,6 +237,7 @@ watch(isMobile, (newValue) => {
   padding: 20px;
   z-index: 1000;
   transition: right 0.3s ease;
+  overflow-y: auto;
 }
 
 .mobile-nav.show {
