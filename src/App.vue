@@ -275,5 +275,16 @@ watch(isMobile, (newValue) => {
   .profile-dropdown {
     display: none;
   }
+
+  .mobile-nav {
+    width: 80%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-nav {
+    width: 100%;
+  }
 }
 </style>
