@@ -5,7 +5,9 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <header class="responsive-header">
     <div class="header-left">
-      <a href="#" class="logo">넷플릭스</a>
+      <a href="#" class="logo">
+        <img src="/netflix.png" alt="넷플릭스" class="logo-image">
+      </a>
       <nav class="desktop-nav">
         <a href="#">홈</a>
         <a href="#">지금 뜨는 콘텐츠</a>
@@ -14,7 +16,9 @@ import { RouterLink, RouterView } from 'vue-router'
       </nav>
     </div>
     <div class="header-right">
-      <div class="profile-pic" @click="toggleProfile">👤</div>
+      <div class="profile-pic" @click="toggleProfile">
+        <img :src="profileIcon" alt="프로필" class="profile-icon">
+      </div>
       <div class="mobile-menu" @click="toggleMenu">☰</div>
     </div>
     <div v-if="showMenu" class="mobile-nav">
@@ -34,11 +38,14 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <script>
+import profileIcon from '@/assets/profile.png'
+
 export default {
   data() {
     return {
       showMenu: false,
       profileImage: 'path_to_profile_image.jpg' // 프로필 이미지 경로 설정 필요
+      profileIcon: profileIcon
     };
   },
   methods: {
@@ -68,10 +75,14 @@ export default {
 }
 
 .logo {
-  color: #e50914;
-  font-size: 24px;
-  text-decoration: none;
+  display: flex;
+  align-items: center;
   margin-right: 20px;
+}
+
+.logo-image {
+  height: 30px; /* 로고 이미지의 높이를 조절하세요 */
+  width: auto; /* 가로 비율 자동 조정 */
 }
 
 .desktop-nav {
@@ -89,7 +100,22 @@ export default {
   align-items: center;
 }
 
-.profile-pic, .mobile-menu {
+.profile-pic {
+  cursor: pointer;
+  margin-left: 20px;
+  width: 32px; /* 프로필 아이콘의 크기를 조절하세요 */
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%; /* 원형 프로필 이미지를 위해 추가 */
+}
+
+.profile-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobile-menu {
   cursor: pointer;
   color: white;
   font-size: 20px;
