@@ -1,5 +1,5 @@
 <template>
-    <div><p>Search!</p></div>
+    <div><p>Browse!</p></div>
 </template>
 
 <style scoped>

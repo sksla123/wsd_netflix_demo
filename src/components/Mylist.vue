@@ -1,5 +1,5 @@
 <template>
-    <div><p>Wish list!</p></div>
+    <div><p>Mylist!</p></div>
 </template>
 
 <style scoped>

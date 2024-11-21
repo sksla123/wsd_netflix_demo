@@ -1,5 +1,5 @@
 <template>
-    <div><p>Trend</p></div>
+    <div><p>Trend!</p></div>
 </template>
 
 <style scoped>

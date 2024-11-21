@@ -1,5 +1,5 @@
 <template>
-    <div><p>Login Page!</p></div>
+    <div><p>Login!</p></div>
 </template>
 
 <style scoped>

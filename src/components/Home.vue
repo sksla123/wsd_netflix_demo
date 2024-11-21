@@ -1,5 +1,5 @@
 <template>
-    <div><p>Hello, World!</p></div>
+    <div><p>Home!</p></div>
 </template>
 
 <style scoped>
