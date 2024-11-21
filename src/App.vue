@@ -1,5 +1,49 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
+import profileIcon from './assets/profile.png';
+
+const showMenu = ref(false);
+const showProfile = ref(false);
+const userEmail = ref('user@example.com');
+const isLoggedIn = ref(false);
+
+const toggleMenu = () => {
+  showMenu.value = !showMenu.value;
+};
+
+const toggleProfile = () => {
+  showProfile.value = !showProfile.value;
+};
+
+const logout = () => {
+  isLoggedIn.value = false;
+  showProfile.value = false;
+  showMenu.value = false;
+  console.log('Logged out');
+};
+
+const login = () => {
+  isLoggedIn.value = true;
+  showProfile.value = false;
+  showMenu.value = false;
+  console.log('Logged in');
+};
+
+const closeDropdowns = (event) => {
+  if (!event.target.closest('.profile-container') && !event.target.closest('.mobile-menu')) {
+    showProfile.value = false;
+    showMenu.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', closeDropdowns);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdowns);
+});
 </script>
 
 <template>
@@ -17,7 +61,7 @@ import { RouterLink, RouterView } from 'vue-router'
     </div>
     <div class="header-right">
       <div class="profile-container">
-        <div class="profile-pic" @click="toggleProfile">
+        <div class="profile-pic" @click.stop="toggleProfile">
           <img :src="profileIcon" alt="프로필" class="profile-icon">
         </div>
         <div v-show="showProfile" class="profile-dropdown">
@@ -32,9 +76,20 @@ import { RouterLink, RouterView } from 'vue-router'
           </template>
         </div>
       </div>
-      <div class="mobile-menu" @click="toggleMenu">☰</div>
+      <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
     <div v-show="showMenu" class="mobile-nav">
+      <div class="mobile-profile">
+        <template v-if="isLoggedIn">
+          <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
+          <p>{{ userEmail }}</p>
+          <button @click="logout" class="logout-button">로그아웃</button>
+        </template>
+        <template v-else>
+          <p>로그인 해주세요</p>
+          <button @click="login" class="login-button">로그인</button>
+        </template>
+      </div>
       <nav>
         <a href="#">홈</a>
         <a href="#">지금 뜨는 콘텐츠</a>
@@ -46,50 +101,6 @@ import { RouterLink, RouterView } from 'vue-router'
   <router-view></router-view>
 </template>
 
-<script>
-import { ref } from 'vue';
-import profileIcon from './assets/profile.png';
-
-export default {
-  setup() {
-    const showMenu = ref(false);
-    const showProfile = ref(false);
-    const userEmail = ref('user@example.com');
-    const isLoggedIn = ref(false); // 로그인 상태를 나타내는 플래그
-
-    const toggleMenu = () => {
-      showMenu.value = !showMenu.value;
-    };
-
-    const toggleProfile = () => {
-      showProfile.value = !showProfile.value;
-    };
-
-    const logout = () => {
-      isLoggedIn.value = false;
-      console.log('Logged out');
-    };
-
-    const login = () => {
-      isLoggedIn.value = true;
-      console.log('Logged in');
-    };
-
-    return {
-      showMenu,
-      showProfile,
-      profileIcon,
-      userEmail,
-      isLoggedIn,
-      toggleMenu,
-      toggleProfile,
-      logout,
-      login
-    };
-  }
-};
-</script>
-
 <style scoped>
 .responsive-header {
   display: flex;
@@ -98,6 +109,7 @@ export default {
   padding: 10px 20px;
   background: #141414;
   position: relative;
+  z-index: 1000;
 }
 
 .header-left {
@@ -112,8 +124,8 @@ export default {
 }
 
 .logo-image {
-  height: 30px; /* 로고 이미지의 높이를 조절하세요 */
-  width: auto; /* 가로 비율 자동 조정 */
+  height: 30px;
+  width: auto;
 }
 
 .desktop-nav {
@@ -135,9 +147,50 @@ export default {
   position: relative;
 }
 
+.profile-pic {
+  cursor: pointer;
+  margin-left: 20px;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.profile-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-dropdown, .mobile-profile {
+  background: #141414;
+  border: 1px solid #333;
+  padding: 20px;
+  border-radius: 4px;
+  z-index: 1001;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .profile-dropdown {
-  /* 기존 스타일 유지 */
-  min-width: 200px; /* 드롭다운의 최소 너비 설정 */
+  position: absolute;
+  top: 100%;
+  right: 0;
+}
+
+.profile-dropdown-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.profile-dropdown p, .mobile-profile p {
+  color: white;
+  margin: 10px 0;
+  text-align: center;
 }
 
 .login-button, .logout-button {
@@ -151,67 +204,35 @@ export default {
   margin-top: 10px;
 }
 
-.profile-dropdown p {
-  color: white;
-  margin: 10px 0;
-  text-align: center;
-}
-
-.logout-button {
-  background: #e50914;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.profile-pic {
-  cursor: pointer;
-  margin-left: 20px;
-  width: 32px;
-  height: 32px;
-  overflow: hidden;
-  border-radius: 50%;
-}
-
-.profile-icon, .mobile-profile-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mobile-profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #212121;
-  padding: 10px;
-}
-
-.mobile-profile-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
 .mobile-menu {
-  display: none; /* 기본적으로 숨김 */
+  display: none;
   cursor: pointer;
   color: white;
-  font-size: 24px; /* 아이콘 크기 조절 */
+  font-size: 24px;
 }
 
 .mobile-nav {
-  display: none; /* 기본적으로 숨김 */
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   background: #141414;
   padding: 20px;
+  z-index: 1000;
+}
+
+.mobile-nav a {
+  color: white;
+  display: block;
+  padding: 10px 0;
+  text-decoration: none;
+}
+
+.mobile-profile {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 20px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
@@ -220,7 +241,11 @@ export default {
   }
 
   .mobile-menu {
-    display: block; /* 모바일에서 표시 */
+    display: block;
+  }
+
+  .profile-pic {
+    display: none;
   }
 
   .mobile-nav {
@@ -228,8 +253,11 @@ export default {
     flex-direction: column;
   }
 
-  .profile-pic {
-    display: none;
+  .profile-dropdown {
+    width: 100%;
+    right: 0;
+    left: 0;
+    top: 100%;
   }
 }
 </style>
