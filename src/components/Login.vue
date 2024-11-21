@@ -17,8 +17,8 @@
 <script setup>
 import { ref } from 'vue'
 import profileImageSrc from '../assets/profile.png'
-import backgroundImage from '../assets/background.svg'
 
+const backgroundImage = '/background.svg'
 const profileImage = ref(profileImageSrc)
 const userName = ref('Jay Bennett')
 const passcode = ref('')
