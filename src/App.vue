@@ -264,6 +264,10 @@ watch(isMobile, (newValue) => {
 }
 
 @media (max-width: 768px) {
+  .responsive-header {
+    background: #141414; /* 모바일에서 검은색 배경 */
+  }
+  
   .desktop-nav {
     display: none;
   }
