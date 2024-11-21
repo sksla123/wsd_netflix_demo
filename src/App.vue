@@ -6,7 +6,7 @@ import profileIcon from './assets/profile.png';
 const showMenu = ref(false);
 const showProfile = ref(false);
 const userEmail = ref('user@example.com');
-const isLoggedIn = ref(false);
+const isLoggedIn = ref(true);
 const isMobile = ref(window.innerWidth <= 768);
 
 const toggleMenu = () => {
