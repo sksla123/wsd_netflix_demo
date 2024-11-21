@@ -16,16 +16,25 @@ import { RouterLink, RouterView } from 'vue-router'
       </nav>
     </div>
     <div class="header-right">
-      <div class="profile-pic" @click="toggleProfile">
-        <img :src="profileIcon" alt="프로필" class="profile-icon">
+      <div class="profile-container">
+        <div class="profile-pic" @click="toggleProfile">
+          <img :src="profileIcon" alt="프로필" class="profile-icon">
+        </div>
+        <div v-show="showProfile" class="profile-dropdown">
+          <template v-if="isLoggedIn">
+            <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
+            <p>{{ userEmail }}</p>
+            <button @click="logout" class="logout-button">로그아웃</button>
+          </template>
+          <template v-else>
+            <p>로그인 해주세요</p>
+            <button @click="login" class="login-button">로그인</button>
+          </template>
+        </div>
       </div>
       <div class="mobile-menu" @click="toggleMenu">☰</div>
     </div>
-    <div v-if="showMenu" class="mobile-nav">
-      <div class="mobile-profile">
-        <img :src="profileImage" alt="Profile" />
-        <p>간단한 프로필 소개</p>
-      </div>
+    <div v-show="showMenu" class="mobile-nav">
       <nav>
         <a href="#">홈</a>
         <a href="#">지금 뜨는 콘텐츠</a>
@@ -38,23 +47,45 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <script>
-import profileIcon from '@/assets/profile.png'
+import { ref } from 'vue';
+import profileIcon from './assets/profile.png';
 
 export default {
-  data() {
-    return {
-      showMenu: false,
-      profileImage: 'path_to_profile_image.jpg' // 프로필 이미지 경로 설정 필요
-      profileIcon: profileIcon
+  setup() {
+    const showMenu = ref(false);
+    const showProfile = ref(false);
+    const userEmail = ref('user@example.com');
+    const isLoggedIn = ref(false); // 로그인 상태를 나타내는 플래그
+
+    const toggleMenu = () => {
+      showMenu.value = !showMenu.value;
     };
-  },
-  methods: {
-    toggleMenu() {
-      this.showMenu = !this.showMenu;
-    },
-    toggleProfile() {
-      // 프로필 클릭 시 추가 동작 구현
-    }
+
+    const toggleProfile = () => {
+      showProfile.value = !showProfile.value;
+    };
+
+    const logout = () => {
+      isLoggedIn.value = false;
+      console.log('Logged out');
+    };
+
+    const login = () => {
+      isLoggedIn.value = true;
+      console.log('Logged in');
+    };
+
+    return {
+      showMenu,
+      showProfile,
+      profileIcon,
+      userEmail,
+      isLoggedIn,
+      toggleMenu,
+      toggleProfile,
+      logout,
+      login
+    };
   }
 };
 </script>
@@ -100,41 +131,55 @@ export default {
   align-items: center;
 }
 
+.profile-container {
+  position: relative;
+}
+
+.profile-dropdown {
+  /* 기존 스타일 유지 */
+  min-width: 200px; /* 드롭다운의 최소 너비 설정 */
+}
+
+.login-button, .logout-button {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.profile-dropdown p {
+  color: white;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.logout-button {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 .profile-pic {
   cursor: pointer;
   margin-left: 20px;
-  width: 32px; /* 프로필 아이콘의 크기를 조절하세요 */
+  width: 32px;
   height: 32px;
   overflow: hidden;
-  border-radius: 50%; /* 원형 프로필 이미지를 위해 추가 */
+  border-radius: 50%;
 }
 
-.profile-icon {
+.profile-icon, .mobile-profile-icon {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.mobile-menu {
-  cursor: pointer;
-  color: white;
-  font-size: 20px;
-  margin-left: 20px;
-}
-
-.mobile-menu {
-  display: none;
-}
-
-.mobile-nav {
-  display: none;
-  flex-direction: column;
-  background: #141414;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 200px;
-  border: 1px solid #e50914;
 }
 
 .mobile-profile {
@@ -145,17 +190,28 @@ export default {
   padding: 10px;
 }
 
-.mobile-profile img {
+.mobile-profile-icon {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   margin-bottom: 10px;
 }
 
-.mobile-nav a {
+.mobile-menu {
+  display: none; /* 기본적으로 숨김 */
+  cursor: pointer;
   color: white;
-  padding: 10px;
-  text-decoration: none;
+  font-size: 24px; /* 아이콘 크기 조절 */
+}
+
+.mobile-nav {
+  display: none; /* 기본적으로 숨김 */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #141414;
+  padding: 20px;
 }
 
 @media (max-width: 768px) {
@@ -164,11 +220,16 @@ export default {
   }
 
   .mobile-menu {
-    display: block;
+    display: block; /* 모바일에서 표시 */
   }
 
   .mobile-nav {
     display: flex;
+    flex-direction: column;
+  }
+
+  .profile-pic {
+    display: none;
   }
 }
 </style>
