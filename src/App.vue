@@ -1,10 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { RouterView } from 'vue-router'
 import Header from './components/Header.vue'
 
 const isLoggedIn = ref(false);
 const userEmail = ref('user@example.com');
+const headerHeight = ref(0);
+const availableHeight = ref(0);
 
 const handleLogin = () => {
   isLoggedIn.value = true;
@@ -15,6 +17,23 @@ const handleLogout = () => {
   isLoggedIn.value = false;
   // 여기에 로그아웃 로직을 추가하세요
 };
+
+const updateAvailableHeight = () => {
+  const header = document.querySelector('header');
+  if (header) {
+    headerHeight.value = header.offsetHeight;
+    availableHeight.value = window.innerHeight - headerHeight.value;
+  }
+};
+
+onMounted(() => {
+  updateAvailableHeight();
+  window.addEventListener('resize', updateAvailableHeight);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateAvailableHeight);
+});
 </script>
 
 <template>
@@ -24,8 +43,8 @@ const handleLogout = () => {
     @login="handleLogin"
     @logout="handleLogout"
   />
-  <main class="main-content">
-    <RouterView />
+  <main class="main-content" :style="{ height: `${availableHeight}px` }">
+    <RouterView :availableHeight="availableHeight" />
   </main>
 </template>
 
@@ -37,6 +56,6 @@ body {
 }
 
 .main-content {
-  padding-top: 0px; /* 헤더의 높이에 맞게 조정하세요 */
+  overflow-y: auto;
 }
 </style>

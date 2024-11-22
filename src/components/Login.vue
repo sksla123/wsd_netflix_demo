@@ -1,64 +1,84 @@
 <template>
-  <div class="login-container">
-    <div class="login-box">
-      <Transition name="rotate" mode="out-in">
-        <!-- 로그인 폼 -->
-        <div v-if="currentView === 'login'" key="login">
-          <h1>로그인</h1>
-          <form @submit.prevent="handleLogin">
-            <input type="email" v-model="loginEmail" placeholder="이메일" required>
-            <input type="password" v-model="loginPassword" placeholder="비밀번호" required>
-            <div class="checkbox-container">
-              <input type="checkbox" id="rememberMe" v-model="rememberMe">
-              <label for="rememberMe">로그인 정보 저장</label>
+  <div class="login-container" :style="{ height: `${availableHeight}px` }">
+    <div class="login-box-wrapper">
+      <img src="/netflix.png" alt="Netflix" class="netflix-logo">
+      <div class="login-box">
+        <Transition name="rotate" mode="out-in">
+          <!-- 로그인 폼 -->
+          <div v-if="currentView === 'login'" key="login">
+            <h1>로그인</h1>
+            <form @submit.prevent="handleLogin">
+              <input type="email" v-model="loginEmail" placeholder="이메일" required>
+              <input type="password" v-model="loginPassword" placeholder="비밀번호" required>
+              <div class="checkbox-container">
+                <input type="checkbox" id="rememberMe" v-model="rememberMe">
+                <label for="rememberMe">로그인 정보 저장</label>
+              </div>
+              <button type="submit" class="login-button">로그인</button>
+            </form>
+            <div class="additional-options">
+              <p>비밀번호를 잊으셨나요? <a @click="currentView = 'resetPassword'">비밀번호 재설정</a></p>
+              <p>계정이 없으신가요? <a @click="currentView = 'signup'">회원가입</a></p>
             </div>
-            <button type="submit">로그인</button>
-          </form>
-          <p>비밀번호를 잊으셨나요? <a @click="currentView = 'resetPassword'">비밀번호 재설정</a></p>
-          <p>계정이 없으신가요? <a @click="currentView = 'signup'">회원가입</a></p>
-        </div>
+          </div>
 
-        <!-- 비밀번호 재설정 폼 -->
-        <div v-else-if="currentView === 'resetPassword'" key="resetPassword">
-          <h1>비밀번호 재설정</h1>
-          <div v-if="resetStep === 1">
-            <input type="email" v-model="resetEmail" placeholder="이메일" required>
-            <button @click="sendResetCode">인증 코드 발송</button>
-          </div>
-          <div v-else-if="resetStep === 2">
-            <input type="text" v-model="resetCode" placeholder="4자리 인증 코드" maxlength="4" required>
-            <button @click="verifyResetCode">인증 코드 확인</button>
-          </div>
-          <div v-else-if="resetStep === 3">
-            <input type="password" v-model="newPassword" placeholder="새 비밀번호" required>
-            <input type="password" v-model="confirmNewPassword" placeholder="새 비밀번호 확인" required>
-            <button @click="resetPassword">비밀번호 재설정</button>
-          </div>
-          <p><a @click="currentView = 'login'">로그인으로 돌아가기</a></p>
-        </div>
-
-        <!-- 회원가입 폼 -->
-        <div v-else-if="currentView === 'signup'" key="signup">
-          <h1>회원가입</h1>
-          <form @submit.prevent="handleSignup">
-            <input type="email" v-model="signupEmail" placeholder="이메일" required>
-            <input type="password" v-model="signupPassword" placeholder="비밀번호" required>
-            <input type="password" v-model="confirmPassword" placeholder="비밀번호 확인" required>
-            <div class="checkbox-container">
-              <input type="checkbox" id="agreeTerms" v-model="agreeTerms">
-              <label for="agreeTerms">서비스 이용약관에 동의합니다</label>
+          <!-- 비밀번호 재설정 폼 -->
+          <div v-else-if="currentView === 'resetPassword'" key="resetPassword">
+            <h1>비밀번호 재설정</h1>
+            <div v-if="resetStep === 1">
+              <input type="email" v-model="resetEmail" placeholder="이메일" required>
+              <button @click="sendResetCode" class="login-button">인증 코드 발송</button>
             </div>
-            <button type="submit">회원가입</button>
-          </form>
-          <p>이미 계정이 있으신가요? <a @click="currentView = 'login'">로그인</a></p>
-        </div>
-      </Transition>
+            <div v-else-if="resetStep === 2">
+              <input type="text" v-model="resetCode" placeholder="4자리 인증 코드" maxlength="4" required>
+              <button @click="verifyResetCode" class="login-button">인증 코드 확인</button>
+            </div>
+            <div v-else-if="resetStep === 3">
+              <input type="password" v-model="newPassword" placeholder="새 비밀번호" required>
+              <input type="password" v-model="confirmNewPassword" placeholder="새 비밀번호 확인" required>
+              <button @click="resetPassword" class="login-button">비밀번호 재설정</button>
+            </div>
+            <div class="additional-options">
+              <p><a @click="currentView = 'login'">로그인으로 돌아가기</a></p>
+            </div>
+          </div>
+
+          <!-- 회원가입 폼 -->
+          <div v-else-if="currentView === 'signup'" key="signup">
+            <h1>회원가입</h1>
+            <form @submit.prevent="handleSignup">
+              <input type="email" v-model="signupEmail" placeholder="이메일" required>
+              <input type="password" v-model="signupPassword" placeholder="비밀번호" required>
+              <input type="password" v-model="confirmPassword" placeholder="비밀번호 확인" required>
+              <div class="checkbox-container">
+                <input type="checkbox" id="agreeTerms" v-model="agreeTerms">
+                <label for="agreeTerms">서비스 이용약관에 동의합니다</label>
+              </div>
+              <button type="submit" class="login-button">회원가입</button>
+            </form>
+            <div v-if="signupMessages.length > 0" class="error-messages">
+              <p v-for="(message, index) in signupMessages" :key="index" class="error-message">{{ message }}</p>
+            </div>
+            <div class="additional-options">
+              <p>이미 계정이 있으신가요? <a @click="currentView = 'login'">로그인</a></p>
+            </div>
+          </div>
+        </Transition>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { handleSignup as signupHandler } from '../api/join';
+
+const props = defineProps({
+  availableHeight: {
+    type: Number,
+    required: true
+  }
+});
 
 const currentView = ref('login');
 const resetStep = ref(1);
@@ -79,6 +99,7 @@ const signupEmail = ref('');
 const signupPassword = ref('');
 const confirmPassword = ref('');
 const agreeTerms = ref(false);
+const signupMessages = ref([]);
 
 // 로그인 처리
 const handleLogin = () => {
@@ -107,8 +128,13 @@ const resetPassword = () => {
 
 // 회원가입 처리
 const handleSignup = () => {
-  console.log('회원가입:', signupEmail.value, signupPassword.value, confirmPassword.value, agreeTerms.value);
-  // 여기에 실제 회원가입 로직 구현
+  const result = signupHandler(signupEmail.value, signupPassword.value, confirmPassword.value, agreeTerms.value);
+  if (result.success) {
+    alert(result.message);
+    window.location.reload();
+  } else {
+    signupMessages.value = result.messages;
+  }
 };
 </script>
 
@@ -117,8 +143,23 @@ const handleSignup = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f3f3f3;
+  background-color: transparent;
+  overflow-y: auto;
+}
+
+.login-box-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.netflix-logo {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: auto;
 }
 
 .login-box {
@@ -126,35 +167,35 @@ const handleSignup = () => {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
 }
 
 h1 {
-  text-align: center;
+  text-align: left;
   margin-bottom: 1.5rem;
 }
 
 input {
-  width: 100%;
-  padding: 0.75rem;
+  width: calc(100% - 16px);
+  height: 40px;
+  padding: 0 8px;
   margin-bottom: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 14px;
 }
 
-button {
+.login-button {
   width: 100%;
-  padding: 0.75rem;
+  height: 40px;
   background-color: #e50914;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
-button:hover {
+.login-button:hover {
   background-color: #f40612;
 }
 
@@ -164,13 +205,25 @@ button:hover {
   margin-bottom: 1rem;
 }
 
-.checkbox-container input {
+.checkbox-container input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 1rem;
   margin-right: 0.5rem;
 }
 
-p {
-  text-align: center;
+.checkbox-container label {
+  font-size: 14px;
+}
+
+.additional-options {
   margin-top: 1rem;
+}
+
+.additional-options p {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
 }
 
 a {
@@ -196,6 +249,16 @@ a {
   transform: rotateY(0deg);
 }
 
+.error-messages {
+  margin-top: 1rem;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 480px) {
   .login-box {
@@ -206,8 +269,13 @@ a {
     font-size: 1.5rem;
   }
 
-  input, button {
-    font-size: 0.9rem;
+  input, .login-button {
+    font-size: 14px;
+  }
+
+  .netflix-logo {
+    width: 120px;
+    top: -50px;
   }
 }
 </style>
