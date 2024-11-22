@@ -46,6 +46,7 @@
           <!-- 회원가입 폼 -->
           <div v-else-if="currentView === 'signup'" key="signup">
             <h1>회원가입</h1>
+            <p v-if="signupMessage" class="error-message">{{ signupMessage }}</p>
             <form @submit.prevent="handleSignup">
               <input type="email" v-model="signupEmail" placeholder="이메일" required>
               <input type="password" v-model="signupPassword" placeholder="비밀번호" required>
@@ -56,9 +57,6 @@
               </div>
               <button type="submit" class="login-button">회원가입</button>
             </form>
-            <div v-if="signupMessages.length > 0" class="error-messages">
-              <p v-for="(message, index) in signupMessages" :key="index" class="error-message">{{ message }}</p>
-            </div>
             <div class="additional-options">
               <p>이미 계정이 있으신가요? <a @click="currentView = 'login'">로그인</a></p>
             </div>
@@ -73,7 +71,7 @@
 import { ref } from 'vue';
 import { handleSignup as signupHandler } from '../api/join';
 
-const props = defineProps({ 
+const props = defineProps({
   availableHeight: {
     type: Number,
     required: true
@@ -99,7 +97,7 @@ const signupEmail = ref('');
 const signupPassword = ref('');
 const confirmPassword = ref('');
 const agreeTerms = ref(false);
-const signupMessages = ref([]);
+const signupMessage = ref('');
 
 // 로그인 처리
 const handleLogin = () => {
@@ -133,7 +131,7 @@ const handleSignup = () => {
     alert(result.message);
     window.location.reload();
   } else {
-    signupMessages.value = result.messages;
+    signupMessage.value = result.message;
   }
 };
 </script>
@@ -155,7 +153,7 @@ const handleSignup = () => {
 
 .netflix-logo {
   position: absolute;
-  top: -60px;
+  top: -80px;
   left: 50%;
   transform: translateX(-50%);
   width: 150px;
@@ -231,6 +229,12 @@ a {
   cursor: pointer;
 }
 
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 1rem;
+}
+
 /* 회전 애니메이션 */
 .rotate-enter-active,
 .rotate-leave-active {
@@ -249,16 +253,6 @@ a {
   transform: rotateY(0deg);
 }
 
-.error-messages {
-  margin-top: 1rem;
-}
-
-.error-message {
-  color: red;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
 /* 반응형 디자인 */
 @media (max-width: 480px) {
   .login-box {
@@ -275,7 +269,7 @@ a {
 
   .netflix-logo {
     width: 120px;
-    top: -50px;
+    top: -60px;
   }
 }
 </style>
