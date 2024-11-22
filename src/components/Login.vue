@@ -73,7 +73,7 @@
 import { ref } from 'vue';
 import { handleSignup as signupHandler } from '../api/join';
 
-const props = defineProps({
+const props = defineProps({ 
   availableHeight: {
     type: Number,
     required: true
