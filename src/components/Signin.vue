@@ -52,7 +52,9 @@
               <input type="password" v-model="confirmPassword" placeholder="비밀번호 확인" required>
               <div class="checkbox-container">
                 <input type="checkbox" id="agreeTerms" v-model="agreeTerms">
-                <label for="agreeTerms">서비스 이용약관에 동의합니다</label>
+                <label for="agreeTerms">
+                  <a @click.prevent="showTerms">서비스 이용약관</a>에 동의합니다
+                </label>
               </div>
               <button type="submit" class="login-button">회원가입</button>
             </form>
@@ -65,6 +67,13 @@
     </div>
   </div>
   <Toast v-if="showToast" :message="toastMessage" :type="toastType" :duration="toastDuration" />
+  <div v-if="showTermsModal" class="terms-modal">
+    <div class="terms-content">
+      <h2>서비스 이용약관</h2>
+      <div class="terms-text">{{ termsOfUse }}</div>
+      <button @click="showTermsModal = false">닫기</button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -74,6 +83,7 @@ import { useStore } from 'vuex';
 import { handleSignup as signupHandler } from './signin/join';
 import { handleLogin as loginHandler } from './signin/signin';
 import Toast from '../components/common/view/Toast.vue';
+import ToU from '../assets/ToU.txt';
 
 const router = useRouter();
 const store = useStore();
@@ -110,6 +120,10 @@ const showToast = ref(false);
 const toastMessage = ref('');
 const toastType = ref('');
 const toastDuration = ref(3000); // 기본 지속 시간을 3초로 설정
+
+// 이용약관 관련 상태
+const termsOfUse = ref('');
+const showTermsModal = ref(false);
 
 // 로그인 처리
 const handleLogin = async () => {
@@ -184,13 +198,25 @@ const handleSignup = () => {
   }
 };
 
-onMounted(() => {
+const showTerms = () => {
+  showTermsModal.value = true;
+};
+
+onMounted(async () => {
   const savedUserInfo = localStorage.getItem('LocalUserInfo');
   if (savedUserInfo) {
     const { email, password } = JSON.parse(savedUserInfo);
     loginEmail.value = email;
     loginPassword.value = password;
     rememberMe.value = true;
+  }
+
+  // 이용약관 불러오기
+  try {
+    const response = await fetch(ToU);
+    termsOfUse.value = await response.text();
+  } catch (error) {
+    console.error('이용약관을 불러오는 데 실패했습니다:', error);
   }
 });
 </script>
@@ -304,6 +330,34 @@ a {
 .rotate-leave-from {
   opacity: 1;
   transform: rotateY(0deg);
+}
+
+/* 이용약관 모달 스타일 */
+.terms-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.terms-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 80%;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
+.terms-text {
+  white-space: pre-wrap;
+  margin-bottom: 1rem;
 }
 
 /* 반응형 디자인 */
