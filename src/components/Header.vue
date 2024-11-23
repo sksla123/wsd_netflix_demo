@@ -101,7 +101,7 @@ onBeforeRouteUpdate(() => {
         <div class="profile-pic" @click.stop="toggleProfile">
           <img :src="profileIcon" alt="프로필" class="profile-icon">
         </div>
-        <div v-show="showProfile && !isMobile" class="profile-dropdown">
+        <div class="profile-dropdown" :style="{ display: showProfile && !isMobile ? 'flex' : 'none' }">
           <template v-if="isLoggedIn">
             <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
             <p>{{ userEmail }}</p>
@@ -116,7 +116,7 @@ onBeforeRouteUpdate(() => {
       <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
   </header>
-  <div :class="['mobile-nav', { 'show': showMenu }]">
+  <div class="mobile-nav" :style="{ right: showMenu ? '0' : '-10000px' }">
     <div class="mobile-profile">
       <template v-if="isLoggedIn">
         <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
@@ -263,7 +263,6 @@ onBeforeRouteUpdate(() => {
 .mobile-nav {
   position: fixed;
   top: 55px;
-  right: -10000px;
   width: 300px;
   height: calc(100vh - 60px);
   background: #141414;
@@ -271,10 +270,6 @@ onBeforeRouteUpdate(() => {
   z-index: 999;
   transition: right 0.3s ease;
   overflow-y: auto;
-}
-
-.mobile-nav.show {
-  right: 0;
 }
 
 .mobile-nav a {
