@@ -1,21 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { RouterView } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useStore } from 'vuex';
+import { RouterView, useRouter } from 'vue-router'
 import Header from './components/Header.vue'
 
-const isLoggedIn = ref(false);
-const userEmail = ref('user@example.com');
+const store = useStore();
+const router = useRouter();
+const isLoggedIn = computed(() => store.state.isLoggedIn);
+const userEmail = computed(() => store.state.userEmail);
 const headerHeight = ref(0); 
 const availableHeight = ref(0);
 
-const handleLogin = () => {
-  isLoggedIn.value = true;
-  // 여기에 로그인 로직을 추가하세요
+const handleLogin = (email) => {
+  store.dispatch('login', email);
 };
 
 const handleLogout = () => {
-  isLoggedIn.value = false;
-  // 여기에 로그아웃 로직을 추가하세요
+  store.dispatch('logout');
 };
 
 const updateAvailableHeight = () => {
@@ -34,6 +35,13 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateAvailableHeight);
 });
+
+// 로그인 상태 감시
+watch(isLoggedIn, (newValue) => {
+  if (!newValue && router.currentRoute.value.path !== '/signin') {
+    router.push('/signin');
+  }
+}, { immediate: true });
 </script>
 
 <template>

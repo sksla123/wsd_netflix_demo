@@ -69,8 +69,14 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { handleSignup as signupHandler } from '../api/join';
+import { handleLogin as loginHandler } from '../api/signin';
 import Toast from '../components/common/view/Toast.vue';
+
+const router = useRouter();
+const store = useStore();
 
 const props = defineProps({
   availableHeight: {
@@ -105,9 +111,19 @@ const toastMessage = ref('');
 const toastType = ref('');
 
 // 로그인 처리
-const handleLogin = () => {
-  console.log('로그인 시도:', loginEmail.value, loginPassword.value, rememberMe.value);
-  // 여기에 실제 로그인 로직 구현
+const handleLogin = async () => {
+  const result = await loginHandler(loginEmail.value, loginPassword.value);
+  if (result.success) {
+    store.dispatch('login', loginEmail.value);
+    router.push('/');
+    showToast.value = true;
+    toastMessage.value = "로그인에 성공했습니다.";
+    toastType.value = 'success';
+  } else {
+    showToast.value = true;
+    toastMessage.value = result.message;
+    toastType.value = 'error';
+  }
 };
 
 // 비밀번호 재설정 처리

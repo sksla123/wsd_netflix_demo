@@ -1,16 +1,15 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router'
+import { useStore } from 'vuex';
 import profileIcon from '../assets/profile.png';
 
-const props = defineProps({
-  isLoggedIn: Boolean,
-  userEmail: String
-});
-
-const emit = defineEmits(['login', 'logout']);
-
+const store = useStore();
 const router = useRouter();
+
+const isLoggedIn = computed(() => store.state.isLoggedIn);
+const userEmail = computed(() => store.state.userEmail);
+
 const showMenu = ref(false);
 const showProfile = ref(false);
 const isMobile = ref(window.innerWidth <= 768);
@@ -25,7 +24,7 @@ const toggleProfile = () => {
 };
 
 const logout = () => {
-  emit('logout');
+  store.dispatch('logout');
   showProfile.value = false;
   showMenu.value = false;
 };
