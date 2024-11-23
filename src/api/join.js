@@ -9,7 +9,6 @@ function loadUsers() {
   }
   
   function isValidEmail(email) {
-    // 간단한 이메일 형식 검사를 위한 정규 표현식
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }

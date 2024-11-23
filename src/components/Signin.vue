@@ -46,7 +46,6 @@
           <!-- 회원가입 폼 -->
           <div v-else-if="currentView === 'signup'" key="signup">
             <h1>회원가입</h1>
-            <p v-if="signupMessage" class="error-message">{{ signupMessage }}</p>
             <form @submit.prevent="handleSignup">
               <input type="email" v-model="signupEmail" placeholder="이메일" required>
               <input type="password" v-model="signupPassword" placeholder="비밀번호" required>
@@ -65,11 +64,13 @@
       </div>
     </div>
   </div>
+  <Toast v-if="showToast" :message="toastMessage" :type="toastType" :duration="3000" />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { handleSignup as signupHandler } from '../api/join';
+import Toast from '../components/common/view/Toast.vue';
 
 const props = defineProps({
   availableHeight: {
@@ -97,7 +98,11 @@ const signupEmail = ref('');
 const signupPassword = ref('');
 const confirmPassword = ref('');
 const agreeTerms = ref(false);
-const signupMessage = ref('');
+
+// Toast 관련 상태
+const showToast = ref(false);
+const toastMessage = ref('');
+const toastType = ref('');
 
 // 로그인 처리
 const handleLogin = () => {
@@ -128,10 +133,16 @@ const resetPassword = () => {
 const handleSignup = () => {
   const result = signupHandler(signupEmail.value, signupPassword.value, confirmPassword.value, agreeTerms.value);
   if (result.success) {
-    alert(result.message);
-    window.location.reload();
+    toastMessage.value = result.message;
+    toastType.value = 'success';
+    showToast.value = true;
+    setTimeout(() => {
+      window.location.reload();
+    }, 3000);
   } else {
-    signupMessage.value = result.message;
+    toastMessage.value = result.message;
+    toastType.value = 'error';
+    showToast.value = true;
   }
 };
 </script>
@@ -227,12 +238,6 @@ input {
 a {
   color: #0071eb;
   cursor: pointer;
-}
-
-.error-message {
-  color: red;
-  font-size: 14px;
-  margin-bottom: 1rem;
 }
 
 /* 회전 애니메이션 */
