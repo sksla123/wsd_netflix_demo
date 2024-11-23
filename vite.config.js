@@ -11,8 +11,7 @@ export default defineConfig({
   base: "/wsd_netflix_demo/",
   build: {
     rollupOptions: {
-      // vuex를 외부 모듈로 설정
-      external: ['vuex'],
+      external: [],
     },
   },
 })
