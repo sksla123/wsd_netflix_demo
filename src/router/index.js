@@ -4,7 +4,7 @@ import Popular from '../components/Popular.vue'
 import Search from '../components/Search.vue'
 import Wishlist from '../components/Wishlist.vue'
 import Signin from '../components/Signin.vue'
-import store from '../store' // Vuex store import
+import store from '../store'
 
 const routes = [
   {

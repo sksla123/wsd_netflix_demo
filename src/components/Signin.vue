@@ -64,15 +64,15 @@
       </div>
     </div>
   </div>
-  <Toast v-if="showToast" :message="toastMessage" :type="toastType" :duration="3000" />
+  <Toast v-if="showToast" :message="toastMessage" :type="toastType" :duration="toastDuration" />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import { handleSignup as signupHandler } from '../api/join';
-import { handleLogin as loginHandler } from '../api/signin';
+import { handleSignup as signupHandler } from './signin/join';
+import { handleLogin as loginHandler } from './signin/signin';
 import Toast from '../components/common/view/Toast.vue';
 
 const router = useRouter();
@@ -109,6 +109,7 @@ const agreeTerms = ref(false);
 const showToast = ref(false);
 const toastMessage = ref('');
 const toastType = ref('');
+const toastDuration = ref(3000); // 기본 지속 시간을 3초로 설정
 
 // 로그인 처리
 const handleLogin = async () => {
@@ -134,9 +135,13 @@ const handleLogin = async () => {
 
 // 비밀번호 재설정 처리
 const sendResetCode = () => {
-  console.log('인증 코드 발송:', resetEmail.value);
-  resetStep.value = 2;
-  // 여기에 실제 인증 코드 발송 로직 구현
+  showToast.value = false;
+  setTimeout(() => {
+    showToast.value = true;
+    toastMessage.value = "현 사이트는 데모 사이트로 비밀번호 초기화를 지원하지 않습니다. 비밀번호를 잊어버리신 경우 로컬 스토리지를 비우고 다시 회원가입을 진행해주시길 바랍니다.";
+    toastType.value = 'warning';
+    toastDuration.value = 10000; // 이 메시지의 지속 시간을 10초로 설정
+  }, 100);
 };
 
 const verifyResetCode = () => {
