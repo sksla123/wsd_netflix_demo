@@ -10,7 +10,8 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: Home,
+    meta: { requiresAuth: true }
   },
   {
     path: '/signin',
@@ -20,17 +21,20 @@ const routes = [
   {
     path: '/popular',
     name: 'Popular',
-    component: Popular
+    component: Popular,
+    meta: { requiresAuth: true }
   },
   {
     path: '/search',
     name: 'Search',
-    component: Search
+    component: Search,
+    meta: { requiresAuth: true }
   },
   {
     path: '/wishlist',
     name: 'Wishlist',
-    component: Wishlist
+    component: Wishlist,
+    meta: { requiresAuth: true }
   },
   {
     path: '/:pathMatch(.*)*',
