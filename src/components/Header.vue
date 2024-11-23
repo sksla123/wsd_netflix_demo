@@ -14,6 +14,7 @@ const showMenu = ref(false);
 const showProfile = ref(false);
 const isMobile = ref(window.innerWidth <= 768);
 const isHeaderHovered = ref(false);
+const mousePosition = ref({ x: 0, y: 0 });
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -54,14 +55,22 @@ const handleHeaderHover = (isHovered) => {
   }
 };
 
+const handleMouseMove = (event) => {
+  if (isHeaderHovered.value) {
+    mousePosition.value = { x: event.clientX, y: event.clientY };
+  }
+};
+
 onMounted(() => {
   document.addEventListener('click', closeDropdowns);
   window.addEventListener('resize', handleResize);
+  document.addEventListener('mousemove', handleMouseMove);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdowns);
   window.removeEventListener('resize', handleResize);
+  document.removeEventListener('mousemove', handleMouseMove);
 });
 
 watch(isMobile, (newValue) => {
@@ -109,6 +118,9 @@ watch(isMobile, (newValue) => {
       </div>
       <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
+    <div v-if="isHeaderHovered" class="ripple-container">
+      <div class="ripple" :style="{ left: mousePosition.x + 'px', top: mousePosition.y + 'px' }"></div>
+    </div>
   </header>
   <div :class="['mobile-nav', { 'show': showMenu }]">
     <div class="mobile-profile">
@@ -144,6 +156,7 @@ watch(isMobile, (newValue) => {
   right: 0;
   z-index: 1000;
   transition: background-color 0.3s ease;
+  overflow: hidden;
 }
 
 .header-hovered {
@@ -283,6 +296,37 @@ watch(isMobile, (newValue) => {
   border-bottom: 1px solid #333;
   padding-bottom: 20px;
   text-align: center;
+}
+
+.ripple-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  animation: ripple-effect 1s linear infinite;
+}
+
+@keyframes ripple-effect {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  }
+  100% {
+    width: 500px;
+    height: 500px;
+    opacity: 0;
+  }
 }
 
 @media (max-width: 768px) {
