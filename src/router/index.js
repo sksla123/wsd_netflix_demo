@@ -16,7 +16,8 @@ const routes = [
   {
     path: '/signin',
     name: 'Signin',
-    component: Signin
+    component: Signin,
+    meta: { requiresUnauth: true }
   },
   {
     path: '/popular',
@@ -54,6 +55,12 @@ router.beforeEach((to, from, next) => {
         path: '/signin',
         query: { redirect: to.fullPath }
       })
+    } else {
+      next()
+    }
+  } else if (to.matched.some(record => record.meta.requiresUnauth)) {
+    if (store.state.isLoggedIn) {
+      next('/')
     } else {
       next()
     }
