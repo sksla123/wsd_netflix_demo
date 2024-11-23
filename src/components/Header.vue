@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import profileIcon from '../assets/profile.png';
 
 const props = defineProps({
@@ -69,6 +69,12 @@ watch(isMobile, (newValue) => {
     showProfile.value = false;
     showMenu.value = false;
   }
+});
+
+// 라우트 변경 시 드롭다운 닫기
+onBeforeRouteUpdate(() => {
+  showProfile.value = false;
+  showMenu.value = false;
 });
 </script>
 
