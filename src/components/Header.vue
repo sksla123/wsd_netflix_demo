@@ -20,7 +20,8 @@ const toggleMenu = () => {
   showMenu.value = !showMenu.value;
 };
 
-const toggleProfile = () => {
+const toggleProfile = (event) => {
+  event.stopPropagation();
   showProfile.value = !showProfile.value;
 };
 
@@ -101,20 +102,22 @@ watch(isMobile, (newValue) => {
     </div>
     <div class="header-right">
       <div class="profile-container">
-        <div class="profile-pic" @click.stop="toggleProfile">
+        <div class="profile-pic" @click="toggleProfile">
           <img :src="profileIcon" alt="프로필" class="profile-icon">
         </div>
-        <div v-show="showProfile && !isMobile" class="profile-dropdown">
-          <template v-if="isLoggedIn">
-            <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
-            <p>{{ userEmail }}</p>
-            <button @click="logout" class="logout-button">로그아웃</button>
-          </template>
-          <template v-else>
-            <p>로그인 해주세요</p>
-            <button @click="login" class="login-button">로그인</button>
-          </template>
-        </div>
+        <transition name="fade">
+          <div v-if="showProfile && !isMobile" class="profile-dropdown">
+            <template v-if="isLoggedIn">
+              <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
+              <p>{{ userEmail }}</p>
+              <button @click="logout" class="logout-button">로그아웃</button>
+            </template>
+            <template v-else>
+              <p>로그인 해주세요</p>
+              <button @click="login" class="login-button">로그인</button>
+            </template>
+          </div>
+        </transition>
       </div>
       <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
@@ -156,7 +159,7 @@ watch(isMobile, (newValue) => {
   right: 0;
   z-index: 1000;
   transition: background-color 0.3s ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .header-hovered {
@@ -229,6 +232,7 @@ watch(isMobile, (newValue) => {
   position: absolute;
   top: 100%;
   right: 0;
+  margin-top: 10px;
 }
 
 .profile-dropdown-icon {
@@ -327,6 +331,17 @@ watch(isMobile, (newValue) => {
     height: 500px;
     opacity: 0;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 @media (max-width: 768px) {

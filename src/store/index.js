@@ -4,6 +4,7 @@ export default createStore({
   state: {
     isLoggedIn: false,
     userEmail: '',
+    userAPIKey: '',
     showLoginSuccessToast: false
   },
   mutations: {
