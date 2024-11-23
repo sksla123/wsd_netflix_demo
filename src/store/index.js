@@ -1,4 +1,14 @@
 import { createStore } from 'vuex'
+import VuexPersistence from 'vuex-persist'
+
+const vuexSessionStorage = new VuexPersistence({
+  storage: window.sessionStorage,
+  reducer: (state) => ({
+    isLoggedIn: state.isLoggedIn,
+    userEmail: state.userEmail,
+    userAPIKey: state.userAPIKey
+  })
+})
 
 export default createStore({
   state: {
@@ -36,5 +46,6 @@ export default createStore({
     clearLoginSuccessToast({ commit }) {
       commit('setShowLoginSuccessToast', false)
     }
-  }
+  },
+  plugins: [vuexSessionStorage.plugin]
 })

@@ -4,11 +4,18 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useStore } from 'vuex';
 import profileIcon from '../assets/profile.png';
 
+
+
 const store = useStore();
 const router = useRouter();
 
 const isLoggedIn = computed(() => store.state.isLoggedIn);
 const userEmail = computed(() => store.state.userEmail);
+
+const props = defineProps({
+  isLoggedIn: Boolean,
+  userEmail: String
+});
 const emit = defineEmits(['login', 'logout'])
 
 const showMenu = ref(false);
@@ -84,12 +91,8 @@ watch(isMobile, (newValue) => {
 </script>
 
 <template>
-  <header 
-    class="responsive-header" 
-    :class="{ 'header-hovered': isHeaderHovered }"
-    @mouseenter="handleHeaderHover(true)"
-    @mouseleave="handleHeaderHover(false)"
-  >
+  <header class="responsive-header" :class="{ 'header-hovered': isHeaderHovered }" @mouseenter="handleHeaderHover(true)"
+    @mouseleave="handleHeaderHover(false)">
     <div class="header-left">
       <RouterLink to="/" class="logo">
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
@@ -108,14 +111,10 @@ watch(isMobile, (newValue) => {
         </div>
         <transition name="fade">
           <div v-if="showProfile && !isMobile" class="profile-dropdown">
-            <template v-if="isLoggedIn">
+            <template v-if="props.isLoggedIn">
               <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
-              <p>{{ userEmail }}</p>
+              <p>{{ props.userEmail }}</p>
               <button @click="logout" class="logout-button">로그아웃</button>
-            </template>
-            <template v-else>
-              <p>로그인 해주세요</p>
-              <button @click="login" class="login-button">로그인</button>
             </template>
           </div>
         </transition>
@@ -217,7 +216,8 @@ watch(isMobile, (newValue) => {
   object-fit: cover;
 }
 
-.profile-dropdown, .mobile-profile {
+.profile-dropdown,
+.mobile-profile {
   background: #141414;
   border: 1px solid #333;
   padding: 20px;
@@ -243,13 +243,15 @@ watch(isMobile, (newValue) => {
   margin-bottom: 10px;
 }
 
-.profile-dropdown p, .mobile-profile p {
+.profile-dropdown p,
+.mobile-profile p {
   color: white;
   margin: 10px 0;
   text-align: center;
 }
 
-.login-button, .logout-button {
+.login-button,
+.logout-button {
   background: #e50914;
   color: white;
   border: none;
@@ -327,6 +329,7 @@ watch(isMobile, (newValue) => {
     height: 0;
     opacity: 0.5;
   }
+
   100% {
     width: 500px;
     height: 500px;
@@ -371,7 +374,8 @@ watch(isMobile, (newValue) => {
     max-width: 300px;
   }
 
-  .login-button, .logout-button {
+  .login-button,
+  .logout-button {
     width: 100px;
     height: 40px;
   }
