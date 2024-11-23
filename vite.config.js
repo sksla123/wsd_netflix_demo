@@ -8,5 +8,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 4200
   },
-  base: "/wsd_netflix_demo/"
+  base: "/wsd_netflix_demo/",
+  build: {
+    rollupOptions: {
+      // vuex를 외부 모듈로 설정
+      external: ['vuex'],
+    },
+  },
 })
