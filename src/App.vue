@@ -5,7 +5,7 @@ import Header from './components/Header.vue'
 
 const isLoggedIn = ref(false);
 const userEmail = ref('user@example.com');
-const headerHeight = ref(0);
+const headerHeight = ref(0); 
 const availableHeight = ref(0);
 
 const handleLogin = () => {

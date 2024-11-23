@@ -1,9 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../components/Home.vue'
-import Login from '../components/Login.vue'
-import Trend from '../components/Trend.vue'
-import Browse from '../components/Browse.vue'
-import Mylist from '../components/Mylist.vue'
+import Popular from '../components/Popular.vue'
+import Search from '../components/Search.vue'
+import Wishlist from '../components/Wishlist.vue'
+import Signin from '../components/Signin.vue'
 
 const routes = [
   {
@@ -12,24 +12,24 @@ const routes = [
     component: Home
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: Login
+    path: '/signin',
+    name: 'Signin',
+    component: Signin
   },
   {
-    path: '/trend',
-    name: 'Trend',
-    component: Trend
+    path: '/popular',
+    name: 'Popular',
+    component: Popular
   },
   {
-    path: '/browse',
-    name: 'Browse',
-    component: Browse
+    path: '/search',
+    name: 'Search',
+    component: Search
   },
   {
-    path: '/mylist',
-    name: 'Mylist',
-    component: Mylist
+    path: '/wishlist',
+    name: 'Wishlist',
+    component: Wishlist
   }
 ]
 
