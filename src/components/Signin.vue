@@ -137,7 +137,7 @@ const handleLogin = async () => {
         password: loginPassword.value
       }));
     }
-    store.dispatch('login', loginEmail.value);
+    store.dispatch('login', { email: loginEmail.value, apiKey: loginPassword.value });
     router.push('/');
   } else {
     showToast.value = false;
@@ -148,6 +148,7 @@ const handleLogin = async () => {
     }, 100);
   }
 };
+
 
 // 비밀번호 재설정 처리
 const sendResetCode = () => {

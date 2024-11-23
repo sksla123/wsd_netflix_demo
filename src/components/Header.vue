@@ -9,6 +9,7 @@ const router = useRouter();
 
 const isLoggedIn = computed(() => store.state.isLoggedIn);
 const userEmail = computed(() => store.state.userEmail);
+const emit = defineEmits(['login', 'logout'])
 
 const showMenu = ref(false);
 const showProfile = ref(false);

@@ -13,8 +13,8 @@ const showLoginSuccessToast = computed(() => store.state.showLoginSuccessToast);
 const headerHeight = ref(0); 
 const availableHeight = ref(0);
 
-const handleLogin = (email) => {
-  store.dispatch('login', email);
+const handleLogin = (email, apiKey) => {
+  store.dispatch('login', { email, apiKey });
 };
 
 const handleLogout = () => {
