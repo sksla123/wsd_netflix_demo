@@ -31,7 +31,7 @@ const logout = () => {
 };
 
 const login = () => {
-  emit('login');
+  router.push('/signin');
 };
 
 const closeDropdowns = (event) => {
@@ -85,9 +85,9 @@ watch(isMobile, (newValue) => {
       </RouterLink>
       <nav class="desktop-nav">
         <RouterLink to="/">홈</RouterLink>
-        <RouterLink to="/trend">지금 뜨는 콘텐츠</RouterLink>
-        <RouterLink to="/browse">찾아보기</RouterLink>
-        <RouterLink to="/mylist">내가 찜한 리스트</RouterLink>
+        <RouterLink to="/popular">지금 뜨는 콘텐츠</RouterLink>
+        <RouterLink to="/search">찾아보기</RouterLink>
+        <RouterLink to="/wishlist">내가 찜한 리스트</RouterLink>
       </nav>
     </div>
     <div class="header-right">
@@ -124,9 +124,9 @@ watch(isMobile, (newValue) => {
     </div>
     <nav>
       <RouterLink to="/">홈</RouterLink>
-      <RouterLink to="/trend">지금 뜨는 콘텐츠</RouterLink>
-      <RouterLink to="/browse">찾아보기</RouterLink>
-      <RouterLink to="/mylist">내가 찜한 리스트</RouterLink>
+      <RouterLink to="/popular">지금 뜨는 콘텐츠</RouterLink>
+      <RouterLink to="/search">찾아보기</RouterLink>
+      <RouterLink to="/wishlist">내가 찜한 리스트</RouterLink>
     </nav>
   </div>
 </template>
