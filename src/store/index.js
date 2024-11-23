@@ -3,7 +3,8 @@ import { createStore } from 'vuex'
 export default createStore({
   state: {
     isLoggedIn: false,
-    userEmail: ''
+    userEmail: '',
+    showLoginSuccessToast: false
   },
   mutations: {
     setLoggedIn(state, value) {
@@ -11,18 +12,23 @@ export default createStore({
     },
     setUserEmail(state, email) {
       state.userEmail = email
+    },
+    setShowLoginSuccessToast(state, value) {
+      state.showLoginSuccessToast = value
     }
   },
   actions: {
     login({ commit }, email) {
-      // 여기에 로그인 로직을 추가하세요
       commit('setLoggedIn', true)
       commit('setUserEmail', email)
+      commit('setShowLoginSuccessToast', true)
     },
     logout({ commit }) {
-      // 여기에 로그아웃 로직을 추가하세요
       commit('setLoggedIn', false)
       commit('setUserEmail', '')
+    },
+    clearLoginSuccessToast({ commit }) {
+      commit('setShowLoginSuccessToast', false)
     }
   }
 })

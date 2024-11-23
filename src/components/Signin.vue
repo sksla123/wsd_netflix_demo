@@ -116,12 +116,6 @@ const handleLogin = async () => {
   if (result.success) {
     store.dispatch('login', loginEmail.value);
     router.push('/');
-    showToast.value = false;
-    setTimeout(() => {
-      showToast.value = true;
-      toastMessage.value = "로그인에 성공했습니다.";
-      toastType.value = 'success';
-    }, 100);
   } else {
     showToast.value = false;
     setTimeout(() => {
