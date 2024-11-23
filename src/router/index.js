@@ -4,6 +4,7 @@ import Popular from '../components/Popular.vue'
 import Search from '../components/Search.vue'
 import Wishlist from '../components/Wishlist.vue'
 import Signin from '../components/Signin.vue'
+import store from '../store' // Vuex store import
 
 const routes = [
   {
@@ -36,6 +37,21 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes: routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!store.state.isLoggedIn) {
+      next({
+        path: '/signin',
+        query: { redirect: to.fullPath }
+      })
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
 })
 
 export default router
