@@ -31,6 +31,10 @@ const routes = [
     path: '/wishlist',
     name: 'Wishlist',
     component: Wishlist
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/'
   }
 ]
 
