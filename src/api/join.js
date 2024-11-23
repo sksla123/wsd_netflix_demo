@@ -8,9 +8,18 @@ function loadUsers() {
     }
   }
   
+  function isValidEmail(email) {
+    // 간단한 이메일 형식 검사를 위한 정규 표현식
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  
   function validate_signup(email, password, confirmPassword, agreeTerms, users) {
     if (!agreeTerms) {
       return "서비스 이용약관에 동의하셔야 가입이 가능합니다.";
+    }
+    if (!isValidEmail(email)) {
+      return "유효한 이메일 주소를 입력해주세요.";
     }
     if (password !== confirmPassword) {
       return "비밀번호가 일치하지 않습니다.";
