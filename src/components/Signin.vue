@@ -1,5 +1,6 @@
 <template>
   <div class="login-container" :style="{ height: `${availableHeight}px` }">
+    <BackgroundAnimation />
     <div class="login-box-wrapper">
       <img src="/netflix.png" alt="Netflix" class="netflix-logo">
       <div class="login-box">
@@ -84,6 +85,7 @@ import { handleSignup as signupHandler } from './signin/join';
 import { handleLogin as loginHandler } from './signin/signin';
 import Toast from '../components/common/view/Toast.vue';
 import ToU from '../assets/ToU.txt';
+import BackgroundAnimation from './signin/BackgroundAnimation.vue';
 
 const router = useRouter();
 const store = useStore();
@@ -223,6 +225,8 @@ onMounted(async () => {
 
 <style scoped>
 .login-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
