@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { handleSignup as signupHandler } from '../api/join';
@@ -114,6 +114,12 @@ const toastType = ref('');
 const handleLogin = async () => {
   const result = await loginHandler(loginEmail.value, loginPassword.value);
   if (result.success) {
+    if (rememberMe.value) {
+      localStorage.setItem('LocalUserInfo', JSON.stringify({
+        email: loginEmail.value,
+        password: loginPassword.value
+      }));
+    }
     store.dispatch('login', loginEmail.value);
     router.push('/');
   } else {
@@ -172,6 +178,16 @@ const handleSignup = () => {
     }, 0);
   }
 };
+
+onMounted(() => {
+  const savedUserInfo = localStorage.getItem('LocalUserInfo');
+  if (savedUserInfo) {
+    const { email, password } = JSON.parse(savedUserInfo);
+    loginEmail.value = email;
+    loginPassword.value = password;
+    rememberMe.value = true;
+  }
+});
 </script>
 
 <style scoped>
