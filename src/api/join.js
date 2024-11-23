@@ -20,11 +20,11 @@ function loadUsers() {
     if (!isValidEmail(email)) {
       return "유효한 이메일 주소를 입력해주세요.";
     }
-    if (password !== confirmPassword) {
-      return "비밀번호가 일치하지 않습니다.";
-    }
     if (password.length < 8) {
       return "비밀번호는 8자리 이상만 사용 가능합니다.";
+    }
+    if (password !== confirmPassword) {
+      return "비밀번호가 일치하지 않습니다.";
     }
     if (email in users) {
       return "이미 가입된 회원입니다.";
@@ -35,6 +35,7 @@ function loadUsers() {
   export function handleSignup(email, password, confirmPassword, agreeTerms) {
     const users = loadUsers();
     const error_msg = validate_signup(email, password, confirmPassword, agreeTerms, users);
+    // console.log("Error message:", error_msg);
     if (error_msg) {
       return { success: false, message: error_msg };
     }

@@ -8,7 +8,7 @@
           <div v-if="currentView === 'login'" key="login">
             <h1>로그인</h1>
             <form @submit.prevent="handleLogin">
-              <input type="email" v-model="loginEmail" placeholder="이메일" required>
+              <input type="text" v-model="loginEmail" placeholder="이메일" required>
               <input type="password" v-model="loginPassword" placeholder="비밀번호" required>
               <div class="checkbox-container">
                 <input type="checkbox" id="rememberMe" v-model="rememberMe">
@@ -26,7 +26,7 @@
           <div v-else-if="currentView === 'resetPassword'" key="resetPassword">
             <h1>비밀번호 재설정</h1>
             <div v-if="resetStep === 1">
-              <input type="email" v-model="resetEmail" placeholder="이메일" required>
+              <input type="text" v-model="resetEmail" placeholder="이메일" required>
               <button @click="sendResetCode" class="login-button">인증 코드 발송</button>
             </div>
             <div v-else-if="resetStep === 2">
@@ -47,7 +47,7 @@
           <div v-else-if="currentView === 'signup'" key="signup">
             <h1>회원가입</h1>
             <form @submit.prevent="handleSignup">
-              <input type="email" v-model="signupEmail" placeholder="이메일" required>
+              <input type="text" v-model="signupEmail" placeholder="이메일" required>
               <input type="password" v-model="signupPassword" placeholder="비밀번호" required>
               <input type="password" v-model="confirmPassword" placeholder="비밀번호 확인" required>
               <div class="checkbox-container">
@@ -133,16 +133,27 @@ const resetPassword = () => {
 const handleSignup = () => {
   const result = signupHandler(signupEmail.value, signupPassword.value, confirmPassword.value, agreeTerms.value);
   if (result.success) {
-    toastMessage.value = result.message;
-    toastType.value = 'success';
-    showToast.value = true;
+    // 즉시 로그인 페이지로 전환
+    currentView.value = 'login';
+    // 회원가입 폼 초기화
+    signupEmail.value = '';
+    signupPassword.value = '';
+    confirmPassword.value = '';
+    agreeTerms.value = false;
+    
+    // 로그인 페이지로 전환 후 토스트 메시지 표시
     setTimeout(() => {
-      window.location.reload();
-    }, 3000);
+      toastMessage.value = "회원가입에 성공했습니다.";
+      toastType.value = 'success';
+      showToast.value = true;
+    }, 100);
   } else {
     toastMessage.value = result.message;
     toastType.value = 'error';
-    showToast.value = true;
+    showToast.value = false;
+    setTimeout(() => {
+      showToast.value = true;
+    }, 0);
   }
 };
 </script>
