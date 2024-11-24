@@ -1,6 +1,8 @@
 <template>
   <div class="home">
-    <MovieBanner v-if="popularMovies.length > 0" :movie="popularMovies[0]" />
+    <div class="banner-container">
+      <MovieBanner v-if="popularMovies.length > 0" :movie="popularMovies[0]" />
+    </div>
 
     <section class="movie-section">
       <h2>인기 영화</h2>
@@ -46,8 +48,8 @@ onMounted(async () => {
     margin-right: auto;
 }
 
-.movie-banner {
-    margin-bottom: 40px; /* MovieBanner 하단 여백 추가 */
+.banner-container {
+    margin-bottom: 40px; /* 배너와 다음 섹션 간의 간격 조정 */
 }
 
 .movie-section {

@@ -99,6 +99,7 @@ export default {
 }
 
 .overview {
+    max-width: 680px;
     font-size: calc(14px + 0.5vw);
     margin-bottom: 20px;
 }
