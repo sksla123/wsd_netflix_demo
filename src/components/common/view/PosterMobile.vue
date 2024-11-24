@@ -175,6 +175,7 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #ffffff; /* 글자 색깔을 하얗게 변경 */
   transition: all 0.3s ease;
 }
 
