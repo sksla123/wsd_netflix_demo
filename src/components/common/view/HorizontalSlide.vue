@@ -3,8 +3,8 @@
         <button class="slide-button left" @click="slideLeft" :disabled="atStart">&lt;</button>
         <div class="slide-wrapper" ref="slideWrapper">
             <div class="slide" :style="{ transform: `translateX(-${slidePosition}px)` }">
-                <component v-for="movie in movies" :key="movie.id" :is="isMobile ? PosterMobile : Poster"
-                    :movie="movie" />
+                <component v-for="movie in movies" :key="movie.id" :is="isMobile ? PosterMobile : Poster" :movie="movie"
+                    class="poster-component" />
             </div>
         </div>
         <button class="slide-button right" @click="slideRight" :disabled="atEnd">&gt;</button>
@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import Poster from './Poster.vue';
 import PosterMobile from './PosterMobile.vue';
 
@@ -29,40 +29,43 @@ const slideWrapper = ref(null);
 const slidePosition = ref(0);
 const maxSlidePosition = ref(0);
 const isMobile = ref(false);
+const posterWidth = ref(200); // 포스터의 기본 너비
 
 const atStart = computed(() => slidePosition.value === 0);
 const atEnd = computed(() => slidePosition.value >= maxSlidePosition.value);
 
 const updateSlidePosition = () => {
-    const wrapperWidth = slideWrapper.value.clientWidth;
-    const slideWidth = slideWrapper.value.scrollWidth;
-    maxSlidePosition.value = Math.max(0, slideWidth - wrapperWidth);
-    slidePosition.value = Math.min(slidePosition.value, maxSlidePosition.value);
+    if (slideWrapper.value) {
+        const wrapperWidth = slideWrapper.value.clientWidth;
+        const slideWidth = props.movies.length * posterWidth.value;
+        maxSlidePosition.value = Math.max(0, slideWidth - wrapperWidth);
+        slidePosition.value = Math.min(slidePosition.value, maxSlidePosition.value);
+    }
 };
 
 const slideLeft = () => {
-    slidePosition.value = Math.max(0, slidePosition.value - 200);
+    slidePosition.value = Math.max(0, slidePosition.value - posterWidth.value);
 };
 
 const slideRight = () => {
-    slidePosition.value = Math.min(maxSlidePosition.value, slidePosition.value + 200);
+    slidePosition.value = Math.min(maxSlidePosition.value, slidePosition.value + posterWidth.value);
 };
 
 const checkMobile = () => {
     isMobile.value = window.innerWidth <= 768;
+    posterWidth.value = isMobile.value ? 150 : 200; // 모바일에서는 포스터 너비를 줄임
+    updateSlidePosition();
 };
 
+watch(() => props.movies, updateSlidePosition);
+
 onMounted(() => {
-    updateSlidePosition();
     checkMobile();
-    window.addEventListener('resize', () => {
-        updateSlidePosition();
-        checkMobile();
-    });
+    updateSlidePosition();
+    window.addEventListener('resize', checkMobile);
 });
 
 onUnmounted(() => {
-    window.removeEventListener('resize', updateSlidePosition);
     window.removeEventListener('resize', checkMobile);
 });
 </script>
@@ -81,6 +84,13 @@ onUnmounted(() => {
 .slide {
     display: flex;
     transition: transform 0.3s ease;
+}
+
+.poster-component {
+    flex: 0 0 auto;
+    width: 200px;
+    /* 데스크톱에서의 포스터 너비 */
+    margin-right: 10px;
 }
 
 .slide-button {
@@ -116,6 +126,11 @@ onUnmounted(() => {
 @media (max-width: 768px) {
     .slide-button {
         display: none;
+    }
+
+    .poster-component {
+        width: 150px;
+        /* 모바일에서의 포스터 너비 */
     }
 }
 </style>
