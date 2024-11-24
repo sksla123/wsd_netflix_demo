@@ -35,3 +35,9 @@ export function processMovieData(data) {
 
     return movies;
 }
+
+export function getMovieDatas() {
+    
+
+    return data
+}
