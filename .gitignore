@@ -63,3 +63,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# api key
+/src/components/test/api_key.json
