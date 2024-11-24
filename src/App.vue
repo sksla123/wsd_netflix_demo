@@ -5,6 +5,7 @@ import { RouterView, useRouter } from 'vue-router'
 import Header from './components/Header.vue'
 import Toast from './components/common/view/Toast.vue'
 import LoadingBar from './components/LoadingBar.vue';
+import axios from 'axios';
 
 const store = useStore();
 const router = useRouter();
