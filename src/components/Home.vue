@@ -20,7 +20,7 @@
 import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import HorizontalSlide from './common/view/HorizontalSlide.vue';
-import MovieBanner from './common/view/MovieBanner.vue'; // MovieBanner 컴포넌트 import
+import MovieBanner from './common/view/MovieBanner.vue';
 import { getMovieUrl } from './common/api/url.js';
 import { getMovieDatas } from './common/api/api.js';
 
@@ -41,47 +41,56 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
 .home {
-    padding: 20px;
-    width: 85%;
-    margin-left: auto;
-    margin-right: auto;
+  padding: 20px;
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: hidden;
 }
 
 .banner-container {
-    margin-bottom: 40px; /* 배너와 다음 섹션 간의 간격 조정 */
+  margin-bottom: 40px;
+  max-width: 100%;
 }
 
 .movie-section {
-    margin-bottom: 60px;
+  margin-bottom: 60px;
+  max-width: 100%;
 }
 
 h2 {
-    font-size: 36px;
-    margin-bottom: 30px;
-    color: #fff;
-    font-weight: bold;
+  font-size: 36px;
+  margin-bottom: 30px;
+  color: #fff;
+  font-weight: bold;
 }
 
 @media (max-width: 1024px) {
-    h2 {
-        font-size: 32px;
-    }
+  h2 {
+    font-size: 32px;
+  }
 }
 
 @media (max-width: 768px) {
-    .home {
-        width: 100%;
-        padding: 15px;
-    }
+  .home {
+    width: 100%;
+    padding: 15px;
+  }
 
-    .movie-section {
-        margin-bottom: 40px;
-    }
+  .movie-section {
+    margin-bottom: 40px;
+  }
 
-    h2 {
-        font-size: 28px;
-        margin-bottom: 20px;
-    }
+  h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
 }
 </style>

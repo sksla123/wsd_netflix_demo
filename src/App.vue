@@ -14,6 +14,7 @@ const userEmail = computed(() => store.state.userEmail);
 const showLoginSuccessToast = computed(() => store.state.showLoginSuccessToast);
 const headerHeight = ref(0);
 const availableHeight = ref(0);
+const availableWidth = ref(0);  // 새로 추가된 부분
 
 const handleLogin = (email, apiKey) => {
   store.dispatch('login', { email, apiKey });
@@ -23,21 +24,22 @@ const handleLogout = () => {
   store.dispatch('logout');
 };
 
-const updateAvailableHeight = () => {
+const updateAvailableDimensions = () => {
   const header = document.querySelector('header');
   if (header) {
     headerHeight.value = header.offsetHeight;
     availableHeight.value = window.innerHeight - headerHeight.value;
+    availableWidth.value = window.innerWidth;  // 새로 추가된 부분
   }
 };
 
 onMounted(() => {
-  updateAvailableHeight();
-  window.addEventListener('resize', updateAvailableHeight);
+  updateAvailableDimensions();
+  window.addEventListener('resize', updateAvailableDimensions);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateAvailableHeight);
+  window.removeEventListener('resize', updateAvailableDimensions);
 });
 
 // 로그인 상태 감시
@@ -64,7 +66,7 @@ watch(showLoginSuccessToast, (newValue) => {
   <loading-bar /> 
   <transition name="fade" mode="out-in">
     <main class="main-content" :style="{ height: `${availableHeight}px` }">
-      <RouterView :availableHeight="availableHeight" />
+      <RouterView :availableHeight="availableHeight" :availableWidth="availableWidth" />
     </main>
   </transition>
   <Toast v-if="showLoginSuccessToast" message="로그인에 성공했습니다." type="success" />
