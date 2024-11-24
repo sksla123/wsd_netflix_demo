@@ -1,105 +1,100 @@
 <template>
     <div class="poster-container" @mouseover="isHovered = true" @mouseleave="isHovered = false">
-        <div class="poster" :class="{ 'hovered': isHovered }" @click="toggleWishlist">
-            <div v-if="!imageLoaded" class="loading">
-                <font-awesome-icon :icon="['fas', 'spinner']" spin />
-            </div>
-            <img v-show="imageLoaded" :src="posterUrl" @load="imageLoaded = true" @error="handleImageError"
-                alt="Movie Poster">
-            <div class="wishlist-star" @click.stop="toggleWishlist">
-                <font-awesome-icon :icon="['fas', 'star']" :class="{ 'wishlist': isInWishlist() }" />
-            </div>
+      <div class="poster" :class="{ 'hovered': isHovered }" @click="toggleWishlist">
+        <div class="poster-content">
+          <div class="loading-overlay" v-if="!imageLoaded">
+            <font-awesome-icon :icon="['fas', 'spinner']" spin class="spinner" />
+          </div>
+          <img :src="posterUrl" @load="imageLoaded = true" @error="handleImageError"
+            alt="Movie Poster" :class="{ 'loaded': imageLoaded }">
         </div>
-        <h3 class="movie-title">{{ title }}</h3>
+        <div class="wishlist-star" @click.stop="toggleWishlist">
+          <font-awesome-icon :icon="['fas', 'star']" :class="{ 'wishlist': isInWishlistState }" />
+        </div>
+      </div>
+      <h3 class="movie-title">{{ title }}</h3>
     </div>
-</template>
-
-<script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
-import { getMovieImageUrl } from '../api/url';
-
-const props = defineProps({
+  </template>
+  
+  <script setup>
+  import { ref, computed, onMounted } from 'vue';
+  import { useStore } from 'vuex';
+  import { getMovieImageUrl } from '../api/url';
+  
+  const props = defineProps({
     movie: {
-        type: Object,
-        required: true
+      type: Object,
+      required: true
     }
-});
-
-const store = useStore();
-const userEmail = computed(() => store.state.userEmail);
-
-const { id, title, posterPath, genreIds } = props.movie;
-const posterUrl = computed(() => {
+  });
+  
+  const store = useStore();
+  const userEmail = computed(() => store.state.userEmail);
+  
+  const { id, title, posterPath, genreIds } = props.movie;
+  const posterUrl = computed(() => {
     if (posterPath) {
-        return getMovieImageUrl(posterPath, 'w500');
+      return getMovieImageUrl(posterPath, 'w500');
     }
     return '/path/to/placeholder-image.jpg';
-});
-const imageLoaded = ref(false);
-const isHovered = ref(false);
-
-const isInWishlist = async () => {
+  });
+  const imageLoaded = ref(false);
+  const isHovered = ref(false);
+  const isInWishlistState = ref(false);
+  
+  const checkWishlist = async () => {
     try {
-        const wishlistStr = await localStorage.getItem('UserWishlist');
-        const wishlist = JSON.parse(wishlistStr || '{}');
-        return wishlist[userEmail.value]?.[id] !== undefined;
+      const wishlistStr = await localStorage.getItem('UserWishlist');
+      const wishlist = JSON.parse(wishlistStr || '{}');
+      isInWishlistState.value = wishlist[userEmail.value]?.[id] !== undefined;
     } catch (error) {
-        // console.error("Error checking wishlist:", error);
-        return false;
+      console.error("Error checking wishlist:", error);
+      isInWishlistState.value = false;
     }
-};
-
-const toggleWishlist = async () => {
+  };
+  
+  const toggleWishlist = async () => {
     try {
-        const wishlistStr = await localStorage.getItem('UserWishlist');
-        const wishlist = JSON.parse(wishlistStr || '{}');
-        
-        if (!wishlist[userEmail.value]) {
-            wishlist[userEmail.value] = {};
-        }
-
-        if (await isInWishlist()) {
-            // console.log("Deleting from wishlist...");
-            delete wishlist[userEmail.value][id];
-        } else {
-            // console.log("Adding to wishlist...");
-            wishlist[userEmail.value][id] = genreIds;
-        }
-
-        await localStorage.setItem('UserWishlist', JSON.stringify(wishlist));
-        // console.log("Wishlist toggled successfully.");
-
-        // 저장 후 확인
-        const savedWishlistStr = await localStorage.getItem('UserWishlist');
-        const savedWishlist = JSON.parse(savedWishlistStr || '{}');
-        // console.log("Saved wishlist:", savedWishlist);
+      const wishlistStr = await localStorage.getItem('UserWishlist');
+      const wishlist = JSON.parse(wishlistStr || '{}');
+      
+      if (!wishlist[userEmail.value]) {
+        wishlist[userEmail.value] = {};
+      }
+  
+      if (isInWishlistState.value) {
+        delete wishlist[userEmail.value][id];
+      } else {
+        wishlist[userEmail.value][id] = genreIds;
+      }
+  
+      await localStorage.setItem('UserWishlist', JSON.stringify(wishlist));
+      await checkWishlist();
     } catch (error) {
-        console.error("Error toggling wishlist:", error);
+      console.error("Error toggling wishlist:", error);
     }
-};
-
-const handleImageError = () => {
+  };
+  
+  const handleImageError = () => {
     posterUrl.value = '/path/to/placeholder-image.jpg';
     imageLoaded.value = true;
-};
-
-onMounted(() => {
-    // Initial wishlist check is not necessary anymore
-});
-</script>
-
-<style scoped>
-.poster-container {
+  };
+  
+  onMounted(async () => {
+    await checkWishlist();
+  });
+  </script>
+  
+  <style scoped>
+  .poster-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 200px;
-    /* 포스터 컨테이너의 너비 설정 */
     margin: 10px;
-}
-
-.poster {
+  }
+  
+  .poster {
     position: relative;
     overflow: hidden;
     border-radius: 10px;
@@ -107,50 +102,86 @@ onMounted(() => {
     transition: all 0.3s ease;
     width: 100%;
     height: 300px;
-    /* 포스터 높이 설정 */
-}
-
-.poster.hovered {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-.poster img {
+  }
+  
+  .poster-content {
+    position: relative;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    /* 이미지 비율 유지 */
-    display: block;
-}
-
-.loading {
+  }
+  
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(80, 80, 80, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
+  }
+  
+  .spinner {
+    font-size: 2rem;
+    color: #ffffff;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .poster img {
     width: 100%;
     height: 100%;
-    background-color: #f0f0f0;
-}
-
-.wishlist-star {
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .poster img.loaded {
+    opacity: 1;
+  }
+  
+  .poster.hovered {
+    transform: scale(1.05);
+    box-shadow: 4px 8px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .wishlist-star {
     position: absolute;
     top: 10px;
     left: 10px;
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    padding: 5px;
-}
-
-.wishlist-star .fa-star {
-    color: #d3d3d3;
-}
-
-.wishlist-star .fa-star.wishlist {
-    color: #ffd700;
-}
-
-.movie-title {
+    z-index: 10;
+    width: 10%;
+    height: 0;
+    padding-bottom: 10%;
+  }
+  
+  .wishlist-star .fa-star {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: #808080;
+    transition: color 0.3s ease;
+  }
+  
+  .wishlist-star .fa-star.wishlist {
+    color: #FFD700;
+  }
+  
+  .wishlist-star:hover .fa-star {
+    color: #FFD700;
+  }
+  
+  .movie-title {
     margin-top: 10px;
     text-align: center;
     font-size: 1rem;
@@ -158,5 +189,6 @@ onMounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-</style>
+  }
+  </style>
+  
