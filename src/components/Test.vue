@@ -1,4 +1,3 @@
-<!-- src/component/test.vue -->
 <template>
     <div>
         <h1>API 테스트</h1>
@@ -11,14 +10,15 @@
         <button @click="testPopularMovies">인기 영화 URL 테스트</button>
         <button @click="testReleaseMovies">최신 개봉 영화 URL 테스트</button>
         <button @click="testGenreMovies">장르별 영화 URL 테스트</button>
-
         <div v-if="result" class="result-container">
             <h2>결과:</h2>
             <pre ref="resultPre" class="result-text">{{ result }}</pre>
             <button @click="copyResult">결과 복사</button>
         </div>
-
-        <Poster v-if="movieData" :movie="movieData" />
+        <div class="posters-container" v-if="movieData && movieData.id && movieData.posterPath">
+            <Poster :movie="movieData" />
+            <PosterMobile :movie="movieData" />
+        </div>
     </div>
 </template>
 
@@ -26,17 +26,19 @@
 import { URLService } from './test/api_test.js';
 import { processMovieData } from './common/api/api.js';
 import Poster from './common/view/Poster.vue';
+import PosterMobile from './common/view/PosterMobile.vue';
 
 export default {
     components: {
-        Poster
+        Poster,
+        PosterMobile
     },
     data() {
         return {
             urlService: new URLService(),
             result: null,
             inputApiKey: '',
-            movieData: null
+            movieData: {}
         };
     },
     mounted() {
@@ -61,9 +63,11 @@ export default {
                     this.result = JSON.stringify(this.movieData, null, 2);
                 } else {
                     this.result = '처리된 영화 데이터가 없습니다.';
+                    this.movieData = {};
                 }
             } catch (error) {
                 this.result = `오류: ${error.message}`;
+                this.movieData = {};
             }
         },
         testPopularMovies() {
@@ -139,17 +143,17 @@ button:hover {
 }
 
 .result-text {
-  background-color: #f4f4f4;
-  padding: 10px;
-  border-radius: 5px;
-  color: #333;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  user-select: text;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  cursor: text;
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    color: #333;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    cursor: text;
 }
 
 pre {
@@ -166,5 +170,13 @@ h1,
 h2,
 div:not(.api-key-container) {
     color: white;
+}
+
+.posters-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    margin-top: 20px;
 }
 </style>

@@ -1,3 +1,17 @@
+import axios from 'axios';
+
+export async function getMovieDatas(url) {
+    try {
+        const response = await axios.get(url);
+        const data = response.data;
+        const movies = processMovieData(data);
+        return movies;
+    } catch (error) {
+        console.error("Error fetching movie data:", error);
+        return [];
+    }
+}
+
 export function processMovieData(data) {
     let movies = [];
 
@@ -34,10 +48,4 @@ export function processMovieData(data) {
     }
 
     return movies;
-}
-
-export function getMovieDatas() {
-    
-
-    return data
 }
