@@ -4,6 +4,7 @@ import Popular from '../components/Popular.vue'
 import Search from '../components/Search.vue'
 import Wishlist from '../components/Wishlist.vue'
 import Signin from '../components/Signin.vue'
+import Test from '../components/Test.vue'
 import store from '../store'
 
 const routes = [
@@ -36,6 +37,11 @@ const routes = [
     name: 'Wishlist',
     component: Wishlist,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: Test
   },
   {
     path: '/:pathMatch(.*)*',
