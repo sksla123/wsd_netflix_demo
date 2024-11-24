@@ -12,7 +12,7 @@ const StartRange = [30, 48];
 const WidthRange = [0.2, 1.2];
 const MovingVelocityRange = [0.15, 0.3]; // 속도 감소
 const LivingTimeRange = [1000, 3000];
-const Probability = 0.4; // 생성 확률 감소
+const Probability = 0.5; // 생성 확률 감소
 const MaxGrowthThickness = 2.5;
 const MaxLines = 50; // 최대 선 개수 제한
 
