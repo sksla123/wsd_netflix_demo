@@ -17,18 +17,26 @@
             <pre ref="resultPre" class="result-text">{{ result }}</pre>
             <button @click="copyResult">결과 복사</button>
         </div>
+
+        <Poster v-if="movieData" :movie="movieData" />
     </div>
 </template>
 
 <script>
 import { URLService } from './test/api_test.js';
+import { processMovieData } from './common/api/api.js';
+import Poster from './common/view/Poster.vue';
 
 export default {
+    components: {
+        Poster
+    },
     data() {
         return {
             urlService: new URLService(),
             result: null,
-            inputApiKey: ''
+            inputApiKey: '',
+            movieData: null
         };
     },
     mounted() {
@@ -47,7 +55,13 @@ export default {
         async testFeaturedMovie() {
             try {
                 const movie = await this.urlService.fetchFeaturedMovie();
-                this.result = JSON.stringify(movie, null, 2);
+                const processedMovies = processMovieData(movie);
+                if (processedMovies.length > 0) {
+                    this.movieData = processedMovies[0];
+                    this.result = JSON.stringify(this.movieData, null, 2);
+                } else {
+                    this.result = '처리된 영화 데이터가 없습니다.';
+                }
             } catch (error) {
                 this.result = `오류: ${error.message}`;
             }
