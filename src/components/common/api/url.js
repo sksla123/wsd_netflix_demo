@@ -9,3 +9,8 @@ export function getMovieUrl(end_point = "/movie/now_playing", page = 1) {
 
   return url;
 }
+
+export function getMovieImageUrl(i_url, i_size = "original") {
+    const baseUrl = "http://image.tmdb.org/t/p/";
+    return `${baseUrl}${i_size}${i_url}`;
+  }
