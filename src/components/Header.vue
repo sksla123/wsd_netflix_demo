@@ -278,7 +278,7 @@ watch(isMobile, (newValue) => {
 
 .mobile-nav {
   position: fixed;
-  top: 55px;
+  top: 50px;
   right: -10000px;
   width: 300px;
   height: calc(100vh - 60px);
