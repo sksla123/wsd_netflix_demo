@@ -1,5 +1,7 @@
 <template>
   <div class="home">
+    <MovieBanner v-if="popularMovies.length > 0" :movie="popularMovies[0]" />
+
     <section class="movie-section">
       <h2>인기 영화</h2>
       <HorizontalSlide :movies="popularMovies" />
@@ -16,6 +18,7 @@
 import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import HorizontalSlide from './common/view/HorizontalSlide.vue';
+import MovieBanner from './common/view/MovieBanner.vue'; // MovieBanner 컴포넌트 import
 import { getMovieUrl } from './common/api/url.js';
 import { getMovieDatas } from './common/api/api.js';
 
@@ -43,19 +46,40 @@ onMounted(async () => {
     margin-right: auto;
 }
 
+.movie-banner {
+    margin-bottom: 40px; /* MovieBanner 하단 여백 추가 */
+}
+
 .movie-section {
-    margin-bottom: 40px;
+    margin-bottom: 60px;
 }
 
 h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 36px;
+    margin-bottom: 30px;
     color: #fff;
+    font-weight: bold;
+}
+
+@media (max-width: 1024px) {
+    h2 {
+        font-size: 32px;
+    }
 }
 
 @media (max-width: 768px) {
     .home {
         width: 100%;
+        padding: 15px;
+    }
+
+    .movie-section {
+        margin-bottom: 40px;
+    }
+
+    h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
     }
 }
 </style>
