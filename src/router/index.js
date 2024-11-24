@@ -54,7 +54,13 @@ const router = createRouter({
   routes: routes
 })
 
+// 로딩바 제어를 위한 변수 추가
+let loadingBar = null
+
 router.beforeEach((to, from, next) => {
+  // 로딩바 시작
+  // if (loadingBar) loadingBar.start()
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!store.state.isLoggedIn) {
       next({
@@ -74,5 +80,17 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+router.afterEach(() => {
+  // 로딩바 완료
+  if (loadingBar) {
+    loadingBar.finish()
+  }
+})
+
+// 로딩바 컴포넌트 설정 함수
+export function setLoadingBar(bar) {
+  loadingBar = bar
+}
 
 export default router

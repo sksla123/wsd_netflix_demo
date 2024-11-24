@@ -4,13 +4,14 @@ import { useStore } from 'vuex';
 import { RouterView, useRouter } from 'vue-router'
 import Header from './components/Header.vue'
 import Toast from './components/common/view/Toast.vue'
+import LoadingBar from './components/LoadingBar.vue';
 
 const store = useStore();
 const router = useRouter();
 const isLoggedIn = computed(() => store.state.isLoggedIn);
 const userEmail = computed(() => store.state.userEmail);
 const showLoginSuccessToast = computed(() => store.state.showLoginSuccessToast);
-const headerHeight = ref(0); 
+const headerHeight = ref(0);
 const availableHeight = ref(0);
 
 const handleLogin = (email, apiKey) => {
@@ -58,15 +59,13 @@ watch(showLoginSuccessToast, (newValue) => {
 </script>
 
 <template>
-  <Header 
-    :isLoggedIn="isLoggedIn" 
-    :userEmail="userEmail"
-    @login="handleLogin"
-    @logout="handleLogout"
-  />
-  <main class="main-content" :style="{ height: `${availableHeight}px` }">
-    <RouterView :availableHeight="availableHeight" />
-  </main>
+  <Header :isLoggedIn="isLoggedIn" :userEmail="userEmail" @login="handleLogin" @logout="handleLogout" />
+  <loading-bar /> 
+  <transition name="fade" mode="out-in">
+    <main class="main-content" :style="{ height: `${availableHeight}px` }">
+      <RouterView :availableHeight="availableHeight" />
+    </main>
+  </transition>
   <Toast v-if="showLoginSuccessToast" message="로그인에 성공했습니다." type="success" />
 </template>
 
@@ -81,3 +80,10 @@ body {
   overflow-y: auto;
 }
 </style>
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}

@@ -4,8 +4,6 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useStore } from 'vuex';
 import profileIcon from '../assets/profile.png';
 
-
-
 const store = useStore();
 const router = useRouter();
 
@@ -115,6 +113,10 @@ watch(isMobile, (newValue) => {
               <img :src="profileIcon" alt="프로필" class="profile-dropdown-icon">
               <p>{{ props.userEmail }}</p>
               <button @click="logout" class="logout-button">로그아웃</button>
+            </template>
+            <template v-else>
+              <p>로그인 해주세요</p>
+              <button @click="login" class="login-button">로그인</button>
             </template>
           </div>
         </transition>
