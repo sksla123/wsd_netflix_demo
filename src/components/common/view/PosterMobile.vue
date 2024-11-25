@@ -1,22 +1,22 @@
 <template>
-  <div class="poster-container" @touchstart="startTouch" @touchend="endTouch">
-    <div class="poster" :class="{ 'touched': isTouched }" @click="toggleWishlist">
-      <div class="poster-content">
-        <div class="loading-overlay" v-if="!imageLoaded">
-          <font-awesome-icon :icon="['fas', 'spinner']" spin class="spinner" />
+  <div class="poster-container-mobile" @touchstart="startTouch" @touchend="endTouch">
+    <div class="poster-mobile" :class="{ 'touched': isTouched }" @click="toggleWishlist">
+      <div class="poster-content-mobile">
+        <div class="loading-overlay-mobile" v-if="!imageLoaded">
+          <font-awesome-icon :icon="['fas', 'spinner']" spin class="spinner-mobile" />
         </div>
         <img :src="posterUrl" @load="imageLoaded = true" @error="handleImageError" alt="Movie Poster" :class="{ 'loaded': imageLoaded }">
       </div>
-      <div class="wishlist-star" :class="{ 'small': isSmallScreen }">
+      <div class="wishlist-star-mobile">
         <font-awesome-icon :icon="['fas', 'star']" :class="{ 'wishlist': isInWishlist }" />
       </div>
     </div>
-    <h3 class="movie-title" :class="{ 'touched': isTouched }">{{ title }}</h3>
+    <h3 class="movie-title-mobile" :class="{ 'touched': isTouched }">{{ title }}</h3>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { getMovieImageUrl } from '../api/url';
 
@@ -31,14 +31,15 @@ const store = useStore();
 const userEmail = computed(() => store.state.userEmail);
 const { id, title, posterPath, genreIds } = props.movie;
 
+const posterUrl = computed(() => {
+  if (posterPath) {
+    return getMovieImageUrl(posterPath, 'w342');
+  }
+  return '/path/to/placeholder-image.jpg';
+});
+
 const imageLoaded = ref(false);
 const isTouched = ref(false);
-const isSmallScreen = ref(false);
-
-const posterUrl = computed(() => {
-  const size = isSmallScreen.value ? 'w185' : 'w342';
-  return posterPath ? getMovieImageUrl(posterPath, size) : '/path/to/placeholder-image.jpg';
-});
 
 const isInWishlist = computed(() => {
   return store.getters.isInWishlist(userEmail.value, id);
@@ -65,25 +66,15 @@ const endTouch = () => {
   isTouched.value = false;
 };
 
-const checkScreenSize = () => {
-  isSmallScreen.value = window.innerWidth < 768;
-};
-
 onMounted(() => {
   if (userEmail.value) {
     store.dispatch('loadWishlist', userEmail.value);
   }
-  checkScreenSize();
-  window.addEventListener('resize', checkScreenSize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenSize);
 });
 </script>
 
 <style scoped>
-.poster-container {
+.poster-container-mobile {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,7 +83,7 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 
-.poster {
+.poster-mobile {
   position: relative;
   overflow: hidden;
   border-radius: 8px;
@@ -103,18 +94,18 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.poster.touched {
+.poster-mobile.touched {
   transform: scale(1.05);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.poster-content {
+.poster-content-mobile {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-.loading-overlay {
+.loading-overlay-mobile {
   position: absolute;
   top: 0;
   left: 0;
@@ -127,7 +118,7 @@ onUnmounted(() => {
   z-index: 1;
 }
 
-.spinner {
+.spinner-mobile {
   font-size: 1.5rem;
   color: #ffffff;
   animation: spin 1s linear infinite;
@@ -138,7 +129,7 @@ onUnmounted(() => {
   100% { transform: rotate(360deg); }
 }
 
-.poster img {
+.poster-mobile img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -147,11 +138,11 @@ onUnmounted(() => {
   transition: opacity 0.3s ease;
 }
 
-.poster img.loaded {
+.poster-mobile img.loaded {
   opacity: 1;
 }
 
-.wishlist-star {
+.wishlist-star-mobile {
   position: absolute;
   top: 5px;
   left: 5px;
@@ -162,12 +153,7 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.wishlist-star.small {
-  width: 10%;
-  padding-bottom: 10%;
-}
-
-.wishlist-star .fa-star {
+.wishlist-star-mobile .fa-star {
   position: absolute;
   top: 0;
   left: 0;
@@ -177,11 +163,11 @@ onUnmounted(() => {
   transition: color 0.3s ease;
 }
 
-.wishlist-star .fa-star.wishlist {
+.wishlist-star-mobile .fa-star.wishlist {
   color: #FFD700;
 }
 
-.movie-title {
+.movie-title-mobile {
   margin-top: 5px;
   text-align: center;
   font-size: 0.9rem;
@@ -189,25 +175,11 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #ffffff;
+  color: #ffffff; /* 글자 색깔을 하얗게 변경 */
   transition: all 0.3s ease;
 }
 
-.movie-title.touched {
+.movie-title-mobile.touched {
   transform: translateY(5px);
-}
-
-@media (max-width: 767px) {
-  .poster-container {
-    width: 120px;
-  }
-
-  .poster {
-    height: 180px;
-  }
-
-  .movie-title {
-    font-size: 0.8rem;
-  }
 }
 </style>
