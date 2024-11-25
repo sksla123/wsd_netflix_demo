@@ -1,14 +1,11 @@
 <template>
-    <div class="scroll-container" ref="scrollContainer">
-        <RecycleScroller class="scroller" :items="movies" :item-size="itemSize" key-field="id" v-slot="{ item }"
-            @scroll="handleScroll">
-            <div class="poster-container">
-                <PosterMobile :movie="item" class="poster-item" />
+    <div class="scroll-container" ref="scrollContainer" @scroll="handleScroll">
+        <div class="white-container" :style="whiteContainerStyle">
+            <div class="poster-container" v-for="movie in movies" :key="movie.id" :style="posterContainerStyle">
+                <PosterMobile :movie="movie" class="poster-item" />
             </div>
-        </RecycleScroller>
-        <div v-if="isLoading" class="loading">
-            Loading...
         </div>
+        <div v-if="isLoading" class="loading">Loading...</div>
         <button class="top-button" @click="scrollToTop">
             <i class="pi pi-angle-double-up"></i>
         </button>
@@ -16,16 +13,19 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { RecycleScroller } from 'vue3-virtual-scroller';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { getMovieAndMetaDatas } from '../api/api';
 import { addPage2MovieUrl } from '../api/url';
 import PosterMobile from './PosterMobile.vue';
-import 'vue3-virtual-scroller/dist/vue3-virtual-scroller.css';
 
-const LAYOUT = {
-    poster: { width: 150, height: 225 },
-    spacing: { gap: 10, padding: 10 }
+const CONFIG = {
+    poster: {
+        width: 165,
+        height: 255,
+        gap: 10,
+        padding: 20,
+        innerPadding: 8
+    }
 };
 
 const props = defineProps({
@@ -33,20 +33,60 @@ const props = defineProps({
 });
 
 // State
+const scrollContainer = ref(null);
 const movies = ref([]);
 const currentPage = ref(1);
 const totalResults = ref(0);
 const isLoading = ref(false);
-const scrollContainer = ref(null);
+const gridDimensions = ref({ columns: 0 });
 
-// Computed
-const itemSize = computed(() => LAYOUT.poster.height + LAYOUT.spacing.gap);
+// containerHeight를 computed로 변경
+const containerHeight = computed(() => {
+    if (!scrollContainer.value) return window.innerHeight * 2;
+    return window.innerHeight * 2;
+});
 
-// Methods
+const posterContainerStyle = computed(() => ({
+    width: `${CONFIG.poster.width}px`,
+    height: `${CONFIG.poster.height}px`,
+    padding: `${CONFIG.poster.innerPadding}px`
+}));
+
+const whiteContainerStyle = computed(() => {
+    const { width, gap, padding } = CONFIG.poster;
+    const { columns } = gridDimensions.value;
+
+    const contentWidth = (columns * width) + ((columns - 1) * gap);
+    const totalWidth = contentWidth + (padding * 2);
+
+    return {
+        width: `${totalWidth}px`,
+        height: `${containerHeight.value}px`,
+        padding: `${padding}px`,
+        gap: `${gap}px`
+    };
+});
+
+const calculateGridColumns = () => {
+    if (!scrollContainer.value) return { columns: 1 };
+
+    const { width, gap, padding } = CONFIG.poster;
+    const containerPadding = 40;
+
+    const availableWidth = scrollContainer.value.clientWidth - containerPadding - (padding * 2);
+    const columns = Math.floor((availableWidth + gap) / (width + gap));
+
+    return {
+        columns: Math.max(1, columns)
+    };
+};
+
+const updateLayout = () => {
+    gridDimensions.value = calculateGridColumns();
+};
+
 const loadMoreMovies = async () => {
-    if (isLoading.value || (totalResults.value > 0 && movies.value.length >= totalResults.value)) {
-        return;
-    }
+    if (isLoading.value || movies.value.length >= totalResults.value) return;
 
     try {
         isLoading.value = true;
@@ -63,11 +103,30 @@ const loadMoreMovies = async () => {
     }
 };
 
-const handleScroll = async (event) => {
-    const { scrollTop, scrollHeight, clientHeight } = event.target;
+const handleScroll = async () => {
+    if (!scrollContainer.value || isLoading.value) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer.value;
     const scrollThreshold = 100;
 
+    // 현재 화면에 표시되어야 할 포스터 개수 계산
+    const { width, height, gap } = CONFIG.poster;
+    const containerWidth = scrollContainer.value.clientWidth - (CONFIG.poster.padding * 2);
+    const currentContainerHeight = containerHeight.value;
+
+    const columns = Math.floor((containerWidth + gap) / (width + gap));
+    const rows = Math.ceil(currentContainerHeight / (height + gap));
+    const requiredItems = columns * rows;
+
+    // 현재 표시된 포스터 수가 필요한 수보다 적으면 더 로드
+    if (movies.value.length < requiredItems) {
+        await loadMoreMovies();
+    }
+
+    // 스크롤이 하단에 가까워지면 컨테이너 높이 증가 및 추가 로드
     if (scrollHeight - (scrollTop + clientHeight) < scrollThreshold) {
+        if (movies.value.length >= totalResults.value) return;
+        containerHeight.value = containerHeight.value + window.innerHeight;
         await loadMoreMovies();
     }
 };
@@ -81,49 +140,64 @@ const scrollToTop = () => {
     }
 };
 
-// Lifecycle
-onMounted(() => {
-    loadMoreMovies();
+onMounted(async () => {
+    updateLayout();
+    await loadMoreMovies();
+
+    const resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(updateLayout);
+    });
+
+    resizeObserver.observe(scrollContainer.value);
+
+    onUnmounted(() => {
+        resizeObserver.disconnect();
+    });
 });
 </script>
 
 <style scoped>
 .scroll-container {
-    height: 100%;
     width: 100%;
-    position: relative;
-    padding: 10px;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
     box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
 }
 
-.scroller {
-    height: 100%;
+.white-container {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .poster-container {
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 5px;
+    justify-content: center;
     box-sizing: border-box;
+    border-radius: 8px;
 }
 
 .poster-item {
-    width: 150px;
-    height: 225px;
+    width: 100%;
+    height: 100%;
 }
 
 .loading {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 10px;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
+    border-radius: 20px;
+    z-index: 1000;
 }
 
 .top-button {
@@ -152,14 +226,16 @@ onMounted(() => {
     opacity: 0.8;
 }
 
-:deep(.vue-recycle-scroller__item-wrapper) {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
 @media (max-width: 768px) {
+    .scroll-container {
+        padding: 10px;
+    }
+
+    .white-container {
+        padding: 10px;
+        gap: 5px;
+    }
+
     .top-button {
         bottom: 15px;
         right: 15px;

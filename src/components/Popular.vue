@@ -1,8 +1,24 @@
 <template>
-  <div class="popular-container" :style="{ height: `${availableHeight}px`, maxHeight: `${availableHeight}px` }">
-    <h2 class="title">지금 뜨는 콘텐츠</h2>
+  <div class="popular-container" :style="containerStyle">
+    <div class="view-switch">
+      <button 
+        class="switch-button" 
+        :class="{ active: !isInfinityView }"
+        @click="isInfinityView = false"
+      >
+        <i class="pi pi-table"></i>
+      </button>
+      <button 
+        class="switch-button" 
+        :class="{ active: isInfinityView }"
+        @click="isInfinityView = true"
+      >
+        <i class="pi pi-align-justify"></i>
+      </button>
+    </div>
     <div class="table-wrapper">
-      <PageTable 
+      <component 
+        :is="currentView"
         v-if="apiKey && baseURL"
         :baseURL="baseURL"
       />
@@ -15,9 +31,10 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import PageTable from '../components/common/view/PageTable.vue';
+import InfinityScroll from '../components/common/view/InfinityScroll.vue';
 import { getBaseMovieUrl } from '../components/common/api/url';
 
 const props = defineProps({
@@ -26,11 +43,22 @@ const props = defineProps({
 });
 
 const store = useStore();
+const isInfinityView = ref(false);
+
 const apiKey = computed(() => store.state.userAPIKey);
 const baseURL = computed(() => {
   if (!apiKey.value) return null;
   return getBaseMovieUrl(apiKey.value, "/movie/popular");
 });
+
+const currentView = computed(() => 
+  isInfinityView.value ? InfinityScroll : PageTable
+);
+
+const containerStyle = computed(() => ({
+  height: isInfinityView.value ? 'auto' : `${props.availableHeight}px`,
+  maxHeight: isInfinityView.value ? 'none' : `${props.availableHeight}px`
+}));
 </script>
 
 <style scoped>
@@ -42,12 +70,35 @@ const baseURL = computed(() => {
   overflow-x: hidden;
 }
 
-.title {
-  color: #ffffff;
-  font-size: 2rem; /* 글자 크기를 줄였습니다 */
-  margin: 20px auto; /* 위아래 간격을 줄였습니다 */
-  font-weight: bold;
-  text-align: center; /* 텍스트를 가운데 정렬 */
+.view-switch {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px auto;
+}
+
+.switch-button {
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.switch-button.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.switch-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.switch-button i {
+  font-size: 1.2rem;
 }
 
 .table-wrapper {
@@ -77,10 +128,16 @@ const baseURL = computed(() => {
 }
 
 @media (max-width: 768px) {
-  .title {
-    font-size: 1.5rem; /* 모바일 화면에서의 글자 크기 조정 */
-    margin: 15px auto; /* 모바일에서도 간격 조정 */
-    text-align: center; /* 모바일에서도 텍스트 가운데 정렬 */
+  .view-switch {
+    margin: 15px auto;
+  }
+
+  .switch-button {
+    padding: 6px 12px;
+  }
+
+  .switch-button i {
+    font-size: 1rem;
   }
 
   .error-message h3 {
