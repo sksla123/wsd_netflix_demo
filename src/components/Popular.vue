@@ -1,44 +1,52 @@
 <template>
   <div class="popular-container">
     <h2 class="title">인기 영화</h2>
-    <PageTable 
-      v-if="apiKey && baseURL"
-      :apiKey="apiKey"
-      :baseURL="baseURL"
-    />
-    <div v-else class="error-message">
-      <h3>API 키가 설정되지 않았습니다</h3>
-      <p>설정 메뉴에서 TMDB API 키를 설정해주세요.</p>
+    <div class="table-wrapper">
+      <PageTable 
+        v-if="apiKey && baseURL"
+        :apiKey="apiKey"
+        :baseURL="baseURL"
+      />
+      <div v-else class="error-message">
+        <h3>API 키가 설정되지 않았습니다</h3>
+        <p>설정 메뉴에서 TMDB API 키를 설정해주세요.</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
-import PageTable from './common/view/PageTable.vue';
-import { getBaseMovieUrl } from './common/api/url';
+import PageTable from '../components/common/view/PageTable.vue';
+import { getBaseMovieUrl } from '../components/common/api/url';
 
 const store = useStore();
 const apiKey = computed(() => store.state.userAPIKey);
 const baseURL = computed(() => {
   if (!apiKey.value) return null;
-  return getBaseMovieUrl(apiKey.value, "/movie/popular");
+  return "/movie/popular";
 });
 </script>
 
 <style scoped>
 .popular-container {
   width: 100%;
-  height: 100%;
-  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
   color: #ffffff;
   font-size: 2rem;
-  margin-bottom: 20px;
+  margin: 20px;
   font-weight: bold;
+}
+
+.table-wrapper {
+  flex: 1;
+  overflow: hidden;
 }
 
 .error-message {
@@ -46,7 +54,7 @@ const baseURL = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 50vh;
+  height: 100%;
   color: #ffffff;
   text-align: center;
 }
@@ -63,13 +71,9 @@ const baseURL = computed(() => {
 }
 
 @media (max-width: 768px) {
-  .popular-container {
-    padding: 10px;
-  }
-
   .title {
     font-size: 1.5rem;
-    margin-bottom: 15px;
+    margin: 15px;
   }
 
   .error-message h3 {

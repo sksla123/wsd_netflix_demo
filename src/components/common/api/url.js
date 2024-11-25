@@ -5,9 +5,14 @@ export function getBaseMovieUrl(api_key, end_point = "/movie/now_playing") {
     return url;
 }
 
+export function addPage2MovieUrl(baseUrl, page=1){
+    const url = `${baseUrl}&page=${page}`;
+    return url;
+}
+
 export function getMovieUrl(api_key, end_point = "/movie/now_playing", page = 1) {
     const baseUrl = getBaseMovieUrl(api_key, end_point)
-    const url = `${baseUrl}page=${page}`;
+    const url = `${baseUrl}&page=${page}`;
 
     return url;
 }
