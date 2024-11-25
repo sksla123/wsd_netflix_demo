@@ -1,18 +1,17 @@
 <template>
   <div class="table-container" ref="tableContainer">
-    <div class="white-container">
-      <div class="movie-grid" ref="gridContainer" :style="gridStyle">
-        <template v-for="movie in displayMovies" :key="movie.id">
-          <div class="poster-container">
-            <div class="poster-wrapper">
-              <component 
-                :is="isMobile ? PosterMobile : Poster" 
-                :movie="movie"
-                class="poster-item"
-              />
-            </div>
-          </div>
-        </template>
+    <div class="white-container" :style="whiteContainerStyle">
+      <div class="poster-container" 
+           v-for="movie in displayMovies" 
+           :key="movie.id" 
+           :style="posterContainerStyle">
+        <div class="poster-wrapper">
+          <component 
+            :is="isMobile ? PosterMobile : Poster" 
+            :movie="movie"
+            class="poster-item"
+          />
+        </div>
       </div>
     </div>
 
@@ -38,135 +37,121 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { getMovieDatas, getMovieAndMetaDatas } from '../api/api';
+import { getMovieAndMetaDatas } from '../api/api';
 import { addPage2MovieUrl } from '../api/url';
 import Poster from './Poster.vue';
 import PosterMobile from './PosterMobile.vue';
 
-const CONTAINER_CONFIG = {
+const CONFIG = {
   desktop: {
-    width: 220,  // 포스터 너비 + 패딩
-    height: 370, // 포스터 높이 + 패딩 + 타이틀 영역
+    posterWidth: 200,
+    posterHeight: 300,
+    titleHeight: 50,
     gap: 20,
     padding: 20,
-    innerPadding: 10  // 포스터와 컨테이너 사이 간격
+    innerPadding: 10
   },
   mobile: {
-    width: 165,  // 포스터 너비 + 패딩
-    height: 265, // 포스터 높이 + 패딩 + 타이틀 영역
+    posterWidth: 150,
+    posterHeight: 225,
+    titleHeight: 40,
     gap: 5,
     padding: 2,
-    innerPadding: 8   // 포스터와 컨테이너 사이 간격
+    innerPadding: 8
   }
 };
 
 const props = defineProps({
-  baseURL: {
-    type: String,
-    required: true
-  }
+  baseURL: { type: String, required: true }
 });
 
+// State
 const movies = ref([]);
 const currentPage = ref(1);
 const totalResults = ref(0);
 const isMobile = ref(false);
 const tableContainer = ref(null);
-const gridContainer = ref(null);
 const gridDimensions = ref({ columns: 0, rows: 0 });
 let resizeObserver = null;
 
+// Computed
+const config = computed(() => isMobile.value ? CONFIG.mobile : CONFIG.desktop);
+
+const posterContainerStyle = computed(() => {
+  const { posterWidth, posterHeight, titleHeight } = config.value;
+  return {
+    width: `${posterWidth}px`,
+    height: `${posterHeight + titleHeight}px`
+  };
+});
+
+const whiteContainerStyle = computed(() => {
+  const { posterWidth, posterHeight, titleHeight, gap } = config.value;
+  const { columns, rows } = gridDimensions.value;
+  
+  const totalWidth = (columns * (posterWidth + gap)) - gap;
+  const totalHeight = (rows * (posterHeight + titleHeight + gap)) - gap;
+  
+  return {
+    width: `${totalWidth}px`,
+    height: `${totalHeight}px`,
+    gap: `${gap}px`
+  };
+});
+
+const itemsPerPage = computed(() => 
+  gridDimensions.value.columns * gridDimensions.value.rows
+);
+
+const calculatedTotalPages = computed(() => 
+  Math.ceil(totalResults.value / itemsPerPage.value) || 1
+);
+
+const displayMovies = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return movies.value.slice(start, start + itemsPerPage.value);
+});
+
+// Methods
 const calculateGridDimensions = () => {
   if (!tableContainer.value) return { columns: 1, rows: 1 };
 
-  const config = isMobile.value ? CONTAINER_CONFIG.mobile : CONTAINER_CONFIG.desktop;
+  const { posterWidth, posterHeight, titleHeight, gap } = config.value;
   const containerPadding = isMobile.value ? 4 : 40;
   const paginationHeight = isMobile.value ? 40 : 100;
   
-  const containerWidth = tableContainer.value.clientWidth - containerPadding;
-  const containerHeight = tableContainer.value.clientHeight - paginationHeight;
+  const availableWidth = tableContainer.value.clientWidth - containerPadding;
+  const availableHeight = tableContainer.value.clientHeight - paginationHeight;
 
-  const usableWidth = containerWidth - (config.padding * 2);
-  const usableHeight = containerHeight - (config.padding * 2);
-
-  const maxColumns = Math.floor((usableWidth + config.gap) / (config.width + config.gap));
-  const maxRows = Math.floor((usableHeight + config.gap) / (config.height + config.gap));
+  const columns = Math.floor(availableWidth / (posterWidth + gap));
+  const rows = Math.floor(availableHeight / (posterHeight + titleHeight + gap));
 
   return {
-    columns: Math.max(1, maxColumns),
-    rows: Math.max(1, maxRows)
+    columns: Math.max(1, columns),
+    rows: Math.max(1, rows)
   };
 };
-
-const gridStyle = computed(() => {
-  const config = isMobile.value ? CONTAINER_CONFIG.mobile : CONTAINER_CONFIG.desktop;
-  const totalWidth = (gridDimensions.value.columns * config.width) + 
-                    ((gridDimensions.value.columns - 1) * config.gap);
-  
-  return {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${gridDimensions.value.columns}, ${config.width}px)`,
-    gap: `${config.gap}px`,
-    padding: `${config.padding}px`,
-    width: `${totalWidth}px`,
-    margin: '0 auto'
-  };
-});
-
-const calculatedTotalPages = computed(() => {
-  const itemsPerPage = gridDimensions.value.columns * gridDimensions.value.rows;
-  if (itemsPerPage <= 0 || totalResults.value <= 0) return 1;
-  return Math.ceil(totalResults.value / itemsPerPage);
-});
-
-const displayMovies = computed(() => {
-  const itemsPerPage = gridDimensions.value.columns * gridDimensions.value.rows;
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return movies.value.slice(start, start + itemsPerPage);
-});
 
 const updateGridLayout = async () => {
   const newDimensions = calculateGridDimensions();
-  const previousItemsPerPage = gridDimensions.value.columns * gridDimensions.value.rows;
-  const newItemsPerPage = newDimensions.columns * newDimensions.rows;
-
-  if (previousItemsPerPage !== newItemsPerPage) {
+  if (JSON.stringify(newDimensions) !== JSON.stringify(gridDimensions.value)) {
+    const currentFirstItem = (currentPage.value - 1) * itemsPerPage.value;
     gridDimensions.value = newDimensions;
-    
     await nextTick();
-    
-    if (previousItemsPerPage > 0) {
-      const currentFirstItem = (currentPage.value - 1) * previousItemsPerPage;
-      currentPage.value = Math.floor(currentFirstItem / newItemsPerPage) + 1;
-    }
-    
-    if (currentPage.value > calculatedTotalPages.value) {
-      currentPage.value = Math.max(1, calculatedTotalPages.value);
-    }
-  }
-};
-
-const checkScreenSize = async () => {
-  const wasMobile = isMobile.value;
-  isMobile.value = window.innerWidth < 768;
-  
-  if (wasMobile !== isMobile.value) {
-    await nextTick();
-    updateGridLayout();
+    currentPage.value = Math.floor(currentFirstItem / itemsPerPage.value) + 1;
+    currentPage.value = Math.min(currentPage.value, calculatedTotalPages.value);
   }
 };
 
 const fetchMovies = async (page) => {
   try {
     const url = addPage2MovieUrl(props.baseURL, page);
-    const processedData = await getMovieAndMetaDatas(url);
+    const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
+    movies.value = [...movies.value, ...newMovies];
+    totalResults.value = total;
     
-    movies.value = [...movies.value, ...processedData.movies];
-    totalResults.value = processedData.totalResults;
-    
-    const itemsPerPage = gridDimensions.value.columns * gridDimensions.value.rows;
-    const remainingItems = movies.value.length - (currentPage.value * itemsPerPage);
-    if (remainingItems < 100 && movies.value.length < totalResults.value) {
+    if (movies.value.length - (currentPage.value * itemsPerPage.value) < 100 
+        && movies.value.length < totalResults.value) {
       await fetchMovies(page + 1);
     }
   } catch (error) {
@@ -174,46 +159,35 @@ const fetchMovies = async (page) => {
   }
 };
 
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
-
-const nextPage = async () => {
-  if (currentPage.value < calculatedTotalPages.value) {
-    currentPage.value++;
-    
-    const itemsPerPage = gridDimensions.value.columns * gridDimensions.value.rows;
-    const neededMovies = (currentPage.value + 1) * itemsPerPage;
-    if (movies.value.length < neededMovies) {
-      await fetchMovies(Math.ceil(movies.value.length / itemsPerPage) + 1);
+const navigation = {
+  prev: () => currentPage.value > 1 && currentPage.value--,
+  next: async () => {
+    if (currentPage.value < calculatedTotalPages.value) {
+      currentPage.value++;
+      const neededMovies = (currentPage.value + 1) * itemsPerPage.value;
+      if (movies.value.length < neededMovies) {
+        await fetchMovies(Math.ceil(movies.value.length / itemsPerPage.value) + 1);
+      }
     }
   }
 };
 
-const initializeLayout = async () => {
-  await nextTick();
-  checkScreenSize();
-  updateGridLayout();
-};
-
-watch([() => gridDimensions.value, () => calculatedTotalPages.value], () => {
-  if (currentPage.value > calculatedTotalPages.value) {
-    currentPage.value = Math.max(1, calculatedTotalPages.value);
-  }
-});
-
+// Lifecycle & Watchers
 onMounted(async () => {
-  await initializeLayout();
+  isMobile.value = window.innerWidth < 768;
+  await nextTick();
+  updateGridLayout();
   
-  window.addEventListener('resize', () => {
-    requestAnimationFrame(checkScreenSize);
-  });
+  window.addEventListener('resize', () => 
+    requestAnimationFrame(() => {
+      isMobile.value = window.innerWidth < 768;
+      updateGridLayout();
+    })
+  );
   
-  resizeObserver = new ResizeObserver(() => {
-    requestAnimationFrame(updateGridLayout);
-  });
+  resizeObserver = new ResizeObserver(() => 
+    requestAnimationFrame(updateGridLayout)
+  );
   
   if (tableContainer.value) {
     resizeObserver.observe(tableContainer.value);
@@ -223,11 +197,12 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenSize);
-  if (resizeObserver) {
-    resizeObserver.disconnect();
-  }
+  window.removeEventListener('resize', updateGridLayout);
+  resizeObserver?.disconnect();
 });
+
+// Exports
+const { prev: prevPage, next: nextPage } = navigation;
 </script>
 
 <style scoped>
@@ -245,21 +220,13 @@ onUnmounted(() => {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin: 0 auto 10px auto;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex: 1;
-}
-
-.movie-grid {
-  display: grid;
-  align-items: start;
+  flex-wrap: wrap;
+  align-content: flex-start;
 }
 
 .poster-container {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
