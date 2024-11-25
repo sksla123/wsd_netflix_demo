@@ -1,10 +1,9 @@
 <template>
   <div class="popular-container">
-    <h2 class="title">인기 영화</h2>
+    <h2 class="title">지금 뜨는 콘텐츠</h2>
     <div class="table-wrapper">
       <PageTable 
         v-if="apiKey && baseURL"
-        :apiKey="apiKey"
         :baseURL="baseURL"
       />
       <div v-else class="error-message">
@@ -25,9 +24,10 @@ const store = useStore();
 const apiKey = computed(() => store.state.userAPIKey);
 const baseURL = computed(() => {
   if (!apiKey.value) return null;
-  return "/movie/popular";
+  return getBaseMovieUrl(apiKey.value, "/movie/popular");
 });
 </script>
+
 
 <style scoped>
 .popular-container {

@@ -1,14 +1,13 @@
 import axios from 'axios';
 
-export async function getMovieDatas(url) {
+export async function getResponse(url) {
     try {
         const response = await axios.get(url);
-        const data = response.data;
-        const movies = processMovieData(data);
-        return movies;
+
+        return response;
     } catch (error) {
         console.error("Error fetching movie data:", error);
-        return [];
+        return NaN;
     }
 }
 
@@ -52,11 +51,31 @@ export function processMovieData(data) {
 
 export function processMovieAndMetaData(data) {
     const movies = processMovieData(data);
-
+    
     return {
         movies,
         page: data.page,
         totalPages: data.total_pages,
         totalResults: data.total_results
     };
+}
+
+export async function getMovieDatas(url) {
+    const response = await getResponse(url);
+    if (response == NaN) {
+        return [];
+    }
+    const data = response.data;
+    const movies = processMovieData(data);
+    return movies;
+}
+
+export async function getMovieAndMetaDatas(url) {
+    const response = await getResponse(url);
+    if (response == NaN) {
+        return [];
+    }
+    const data = response.data;
+    const metaAndMovies = processMovieAndMetaData(data);
+    return metaAndMovies;
 }
