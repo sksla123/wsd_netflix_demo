@@ -1,6 +1,10 @@
 <template>
-  <div class="poster-container-mobile" @touchstart="startTouch" @touchend="endTouch">
-    <div class="poster-mobile" :class="{ 'touched': isTouched }" @click="toggleWishlist">
+  <div class="poster-container-mobile" 
+       @touchstart="startTouch" 
+       @touchend="endTouch"
+       @mouseenter="startHover"
+       @mouseleave="endHover">
+    <div class="poster-mobile" :class="{ 'touched': isTouched, 'hovered': isHovered }" @click="toggleWishlist">
       <div class="poster-content-mobile">
         <div class="loading-overlay-mobile" v-if="!imageLoaded">
           <font-awesome-icon :icon="['fas', 'spinner']" spin class="spinner-mobile" />
@@ -11,7 +15,7 @@
         <font-awesome-icon :icon="['fas', 'star']" :class="{ 'wishlist': isInWishlist }" />
       </div>
     </div>
-    <h3 class="movie-title-mobile" :class="{ 'touched': isTouched }">{{ title }}</h3>
+    <h3 class="movie-title-mobile" :class="{ 'touched': isTouched, 'hovered': isHovered }">{{ title }}</h3>
   </div>
 </template>
 
@@ -40,6 +44,7 @@ const posterUrl = computed(() => {
 
 const imageLoaded = ref(false);
 const isTouched = ref(false);
+const isHovered = ref(false);
 
 const isInWishlist = computed(() => {
   return store.getters.isInWishlist(userEmail.value, id);
@@ -64,6 +69,14 @@ const startTouch = () => {
 
 const endTouch = () => {
   isTouched.value = false;
+};
+
+const startHover = () => {
+  isHovered.value = true;
+};
+
+const endHover = () => {
+  isHovered.value = false;
 };
 
 onMounted(() => {
@@ -94,7 +107,8 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.poster-mobile.touched {
+.poster-mobile.touched,
+.poster-mobile.hovered {
   transform: scale(1.05);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
@@ -175,11 +189,12 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #ffffff; /* 글자 색깔을 하얗게 변경 */
+  color: #ffffff;
   transition: all 0.3s ease;
 }
 
-.movie-title-mobile.touched {
+.movie-title-mobile.touched,
+.movie-title-mobile.hovered {
   transform: translateY(5px);
 }
 </style>

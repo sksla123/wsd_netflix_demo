@@ -11,7 +11,6 @@
         />
       </div>
     </div>
-
     <nav class="pagination">
       <button 
         @click="changePage(-1)" 
@@ -27,6 +26,7 @@
     </nav>
   </div>
 </template>
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { getMovieAndMetaDatas } from '../api/api';

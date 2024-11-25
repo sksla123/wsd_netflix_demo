@@ -21,7 +21,7 @@ import PosterMobile from './PosterMobile.vue';
 
 const LAYOUT = {
     poster: { width: 150, height: 225 },
-    spacing: { gap: 10, padding: 20 }
+    spacing: { gap: 10, padding: 20, inner: 8 }
 };
 
 const props = defineProps({
@@ -147,7 +147,8 @@ onUnmounted(() => {
 .infinity-scroll-container {
     position: relative;
     overflow-y: auto;
-    height: calc(100vh - 40px); /* infinity-scroll-container의 높이 */
+    height: calc(100vh - 40px);
+    /* infinity-scroll-container의 높이 */
     display: flex;
     justify-content: center;
 }
@@ -185,6 +186,6 @@ onUnmounted(() => {
 }
 
 .scroll-top-button i {
-   font-size: 1.5rem;
+    font-size: 1.5rem;
 }
 </style>
