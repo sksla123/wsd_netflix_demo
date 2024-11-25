@@ -34,8 +34,9 @@ const totalResults = ref(0);
 const currentPage = ref(1);
 const scrollContainer = ref(null);
 const containerWidth = ref(0);
-const containerHeight = ref(0); // white-container의 높이를 저장
-
+const containerHeight = ref(0); // 현재 white-container의 높이
+const initialHeight = ref(0); // 최초 white-container의 높이
+const lastScrollTop = ref(0); // 마지막 스크롤 위치 저장
 const init_flag = ref(true);
 
 const grid = computed(() => {
@@ -59,6 +60,43 @@ const posterStyle = computed(() => ({
     height: `${LAYOUT.poster.height}px`
 }));
 
+// white-container의 높이를 업데이트하는 함수
+const updateContainerSize = () => {
+    if (scrollContainer.value) {
+        containerWidth.value = scrollContainer.value.clientWidth;
+        const newHeight = scrollContainer.value.clientHeight; // 현재 infinity-scroll-container의 높이
+        initialHeight.value = newHeight; // 최초 높이를 업데이트
+        if (containerHeight.value === 0) {
+            containerHeight.value = newHeight; // 초기 설정
+        }
+    }
+};
+
+// 스크롤 이벤트가 발생할 때 white-container의 height를 조정
+const handleScroll = () => {
+    const container = scrollContainer.value;
+    if (!container) return;
+
+    const currentScrollTop = container.scrollTop; // 현재 스크롤 위치
+
+    if (currentScrollTop > lastScrollTop.value) {
+        // 아래로 스크롤 -> height 증가
+        containerHeight.value += currentScrollTop - lastScrollTop.value;
+    } else if (currentScrollTop < lastScrollTop.value) {
+        // 위로 스크롤 -> height 감소
+        containerHeight.value -= lastScrollTop.value - currentScrollTop;
+        if (containerHeight.value < initialHeight.value) {
+            containerHeight.value = initialHeight.value; // 최초 높이 이하로 줄어들지 않도록 설정
+        }
+    }
+
+    lastScrollTop.value = currentScrollTop; // 마지막 스크롤 위치 업데이트
+
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+        loadMoreMovies();
+    }
+};
+
 const loadMoreMovies = async () => {
     if (!init_flag.value && movies.value.length >= totalResults.value) return;
 
@@ -70,23 +108,9 @@ const loadMoreMovies = async () => {
     currentPage.value += 1;
 };
 
-const handleScroll = () => {
-    const container = scrollContainer.value;
-    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-        loadMoreMovies();
-    }
-};
-
 const scrollToTop = () => {
     if (scrollContainer.value) {
         scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-};
-
-const updateContainerSize = () => {
-    if (scrollContainer.value) {
-        containerWidth.value = scrollContainer.value.clientWidth;
-        containerHeight.value = scrollContainer.value.clientHeight; // white-container 높이를 업데이트
     }
 };
 
@@ -98,16 +122,21 @@ onMounted(async () => {
     for (let i = 0; i < 9; i++) {
         await loadMoreMovies();
     }
-    
+
     init_flag.value = false;
 
-    scrollContainer.value.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', updateContainerSize);
+    // 초기 크기 업데이트 및 이벤트 리스너 등록
     updateContainerSize();
+
+    scrollContainer.value.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('resize', updateContainerSize); // 창 크기 변경 시 호출
 });
 
 onUnmounted(() => {
+    // 이벤트 리스너 제거
     window.removeEventListener('resize', updateContainerSize);
+
     if (scrollContainer.value) {
         scrollContainer.value.removeEventListener('scroll', handleScroll);
     }
@@ -144,15 +173,15 @@ onUnmounted(() => {
 .scroll-top-button {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    right: 3%;
     background-color: red;
     color: white;
     border-radius: 50%;
     width: 40px;
     height: 40px;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 }
 
 .scroll-top-button i {
