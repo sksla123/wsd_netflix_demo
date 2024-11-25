@@ -1,11 +1,12 @@
 <template>
   <div class="table-container" ref="tableContainer">
-    <div class="white-container" :style="containerStyle">
+    <div class="white-container">
       <div class="movie-grid" ref="gridContainer" :style="gridStyle">
         <template v-for="movie in displayMovies" :key="movie.id">
           <component 
             :is="isMobile ? PosterMobile : Poster" 
             :movie="movie"
+            class="poster-item"
           />
         </template>
       </div>
@@ -49,9 +50,9 @@ const POSTER_CONFIG = {
   mobile: {
     width: 150,
     height: 225,
-    totalHeight: 245, // 더 축소된 전체 높이
+    totalHeight: 245,
     gap: 5,
-    padding: 5
+    padding: 2
   }
 };
 
@@ -75,8 +76,8 @@ const calculateGridDimensions = () => {
   if (!tableContainer.value) return { columns: 1, rows: 1 };
 
   const config = isMobile.value ? POSTER_CONFIG.mobile : POSTER_CONFIG.desktop;
-  const containerPadding = isMobile.value ? 10 : 40;
-  const paginationHeight = isMobile.value ? 50 : 100;
+  const containerPadding = isMobile.value ? 4 : 40;
+  const paginationHeight = isMobile.value ? 40 : 100;
   
   const containerWidth = tableContainer.value.clientWidth - containerPadding;
   const containerHeight = tableContainer.value.clientHeight - paginationHeight;
@@ -95,30 +96,16 @@ const calculateGridDimensions = () => {
 
 const gridStyle = computed(() => {
   const config = isMobile.value ? POSTER_CONFIG.mobile : POSTER_CONFIG.desktop;
+  const totalWidth = (gridDimensions.value.columns * config.width) + 
+                    ((gridDimensions.value.columns - 1) * config.gap);
+  
   return {
+    display: 'grid',
     gridTemplateColumns: `repeat(${gridDimensions.value.columns}, ${config.width}px)`,
     gap: `${config.gap}px`,
     padding: `${config.padding}px`,
-    justifyContent: 'center',
-    width: '100%'
-  };
-});
-
-const containerStyle = computed(() => {
-  const config = isMobile.value ? POSTER_CONFIG.mobile : POSTER_CONFIG.desktop;
-  const totalWidth = (gridDimensions.value.columns * config.width) + 
-                    ((gridDimensions.value.columns - 1) * config.gap) + 
-                    (config.padding * 2);
-  const totalHeight = (gridDimensions.value.rows * config.totalHeight) + 
-                     ((gridDimensions.value.rows - 1) * config.gap) + 
-                     (config.padding * 2);
-  
-  return {
-    width: '100%',
-    height: `${totalHeight}px`,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start'
+    width: `${totalWidth}px`,
+    margin: '0 auto'
   };
 });
 
@@ -257,15 +244,18 @@ onUnmounted(() => {
   margin-bottom: 10px;
   display: flex;
   justify-content: center;
-  width: 100%;
+  align-items: flex-start;
+  flex: 1;
 }
 
 .movie-grid {
   display: grid;
-  justify-content: center;
   align-items: start;
+}
+
+.poster-item {
   width: 100%;
-  box-sizing: border-box;
+  height: 100%;
 }
 
 .pagination-controls {
@@ -308,28 +298,28 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .table-container {
-    padding: 5px;
+    padding: 4px;
   }
 
   .white-container {
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
 
   .pagination-controls {
     padding: 8px;
-    gap: 10px;
-    margin-top: 5px;
+    gap: 8px;
+    margin-top: 4px;
   }
 
   .page-button {
-    padding: 6px 12px;
+    padding: 4px 8px;
     font-size: 0.9rem;
-    min-width: 60px;
+    min-width: 50px;
   }
 
   .page-info {
     font-size: 0.9rem;
-    min-width: 80px;
+    min-width: 70px;
   }
 }
 </style>
