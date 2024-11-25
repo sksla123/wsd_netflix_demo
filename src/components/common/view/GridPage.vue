@@ -24,9 +24,15 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { getMovieDatas, processMovieAndMetaData } from '../api/api';
-import { getMovieUrl } from '../api/url';
 import Poster from './Poster.vue';
 import PosterMobile from './PosterMobile.vue';
+
+const props = defineProps({
+  getUrl: {
+    type: Function,
+    required: true
+  }
+});
 
 const store = useStore();
 const currentPage = ref(1);
@@ -37,13 +43,12 @@ const displayedMovies = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const isMobile = ref(false);
-const apiKey = store.state.userAPIKey;
 
 const fetchMovies = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const url = getMovieUrl(apiKey, "/movie/now_playing", currentPage.value);
+    const url = props.getUrl(currentPage.value);
     const response = await getMovieDatas(url);
     const data = processMovieAndMetaData(response);
 
