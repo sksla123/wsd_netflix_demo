@@ -5,8 +5,7 @@
            :key="movie.id" 
            class="poster-container"
            :style="posterStyle">
-        <component 
-          :is="isMobile ? PosterMobile : Poster" 
+        <PosterMobile 
           :movie="movie"
           class="poster-item"
         />
@@ -32,18 +31,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { getMovieAndMetaDatas } from '../api/api';
 import { addPage2MovieUrl } from '../api/url';
-import Poster from './Poster.vue';
 import PosterMobile from './PosterMobile.vue';
 
 const LAYOUT = {
-  desktop: {
-    poster: { width: 220, height: 340 },
-    spacing: { gap: 10, padding: 20, inner: 10 }
-  },
-  mobile: {
-    poster: { width: 165, height: 255 },
-    spacing: { gap: 5, padding: 10, inner: 8 }
-  }
+  poster: { width: 150, height: 225 },
+  spacing: { gap: 10, padding: 20, inner: 8 }
 };
 
 const props = defineProps({
@@ -54,12 +46,10 @@ const props = defineProps({
 const movies = ref([]);
 const currentPage = ref(1);
 const totalResults = ref(0);
-const isMobile = ref(false);
 const tableContainer = ref(null);
 const grid = ref({ columns: 0, rows: 0 });
 
 // Computed
-const layout = computed(() => isMobile.value ? LAYOUT.mobile : LAYOUT.desktop);
 const itemsPerPage = computed(() => grid.value.columns * grid.value.rows);
 const totalPages = computed(() => Math.ceil(totalResults.value / itemsPerPage.value) || 1);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -71,14 +61,14 @@ const displayMovies = computed(() => {
 });
 
 const posterStyle = computed(() => ({
-  width: `${layout.value.poster.width}px`,
-  height: `${layout.value.poster.height}px`,
-  padding: `${layout.value.spacing.inner}px`
+  width: `${LAYOUT.poster.width}px`,
+  height: `${LAYOUT.poster.height}px`,
+  padding: `${LAYOUT.spacing.inner}px`
 }));
 
 const containerStyle = computed(() => {
-  const { width, height } = layout.value.poster;
-  const { gap, padding } = layout.value.spacing;
+  const { width, height } = LAYOUT.poster;
+  const { gap, padding } = LAYOUT.spacing;
   const { columns, rows } = grid.value;
   
   const contentWidth = (columns * width) + ((columns - 1) * gap);
@@ -96,10 +86,10 @@ const containerStyle = computed(() => {
 const updateLayout = () => {
   if (!tableContainer.value) return;
 
-  const { width, height } = layout.value.poster;
-  const { gap, padding } = layout.value.spacing;
-  const containerPadding = isMobile.value ? 20 : 40;
-  const paginationHeight = isMobile.value ? 60 : 100;
+  const { width, height } = LAYOUT.poster;
+  const { gap, padding } = LAYOUT.spacing;
+  const containerPadding = 40;
+  const paginationHeight = 80;
 
   const availableWidth = tableContainer.value.clientWidth - containerPadding - (padding * 2);
   const availableHeight = tableContainer.value.clientHeight - paginationHeight - (padding * 2);
@@ -142,7 +132,6 @@ const loadMoreMovies = async (page) => {
 // Lifecycle
 onMounted(() => {
   const resizeObserver = new ResizeObserver(() => {
-    isMobile.value = window.innerWidth < 768;
     requestAnimationFrame(updateLayout);
   });
   
