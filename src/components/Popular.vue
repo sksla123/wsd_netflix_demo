@@ -44,9 +44,10 @@ const baseURL = computed(() => {
 
 .title {
   color: #ffffff;
-  font-size: 2rem;
-  margin: 20px;
+  font-size: 2.5rem;
+  margin: 30px auto; /* 가운데 정렬을 위해 margin을 auto로 설정 */
   font-weight: bold;
+  text-align: center; /* 텍스트를 가운데 정렬 */
 }
 
 .table-wrapper {
@@ -77,8 +78,9 @@ const baseURL = computed(() => {
 
 @media (max-width: 768px) {
   .title {
-    font-size: 1.5rem;
-    margin: 15px;
+    font-size: 2rem;
+    margin: 20px auto; /* 모바일에서도 가운데 정렬 유지 */
+    text-align: center; /* 모바일에서도 텍스트 가운데 정렬 */
   }
 
   .error-message h3 {
