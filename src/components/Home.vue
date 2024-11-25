@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home" :class="{ 'mobile': isMobile }" :style="mobileStyle">
     <div class="banner-container">
       <MovieBanner v-if="popularMovies.length > 0" :movie="popularMovies[0]" />
     </div>
@@ -17,12 +17,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import HorizontalSlide from './common/view/HorizontalSlide.vue';
 import MovieBanner from './common/view/MovieBanner.vue';
 import { getMovieUrl } from './common/api/url.js';
 import { getMovieDatas } from './common/api/api.js';
+
+const props = defineProps({
+  availableWidth: {
+    type: Number,
+    required: true
+  }
+});
+
+const isMobile = computed(() => props.availableWidth <= 768);
+
+const mobileStyle = computed(() => {
+  if (isMobile.value) {
+    return { maxWidth: `${props.availableWidth}px` };
+  }
+  return {};
+});
 
 const store = useStore();
 const popularMovies = ref([]);
@@ -41,18 +57,15 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
-
 .home {
   padding: 20px;
-  width: 85%;
   margin-left: auto;
   margin-right: auto;
   overflow-x: hidden;
+}
+
+.home.mobile {
+  padding: 15px;
 }
 
 .banner-container {
@@ -79,11 +92,6 @@ h2 {
 }
 
 @media (max-width: 768px) {
-  .home {
-    width: 100%;
-    padding: 15px;
-  }
-
   .movie-section {
     margin-bottom: 40px;
   }
