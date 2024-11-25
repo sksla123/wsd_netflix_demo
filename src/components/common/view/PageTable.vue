@@ -281,30 +281,11 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   padding: 10px;
-  gap: 10px;
+  gap: 15px;
   margin-top: 10px;
 }
 
-.page-numbers {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.page-info {
-  color: white;
-  font-size: 1rem;
-  min-width: 80px;
-  text-align: center;
-}
-
 .page-button {
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.page-button,
-.page-number {
   padding: 6px 12px;
   background: none;
   color: white;
@@ -312,30 +293,24 @@ onUnmounted(() => {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 40px;
+  min-width: 60px;
   font-size: 0.9rem;
 }
 
-.page-button:hover:not(:disabled),
-.page-number:hover:not(:disabled):not(.active):not(.ellipsis) {
+.page-button:hover:not(:disabled) {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.page-button:disabled,
-.page-number:disabled {
+.page-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.page-number.active {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.page-number.ellipsis {
-  border: none;
-  padding: 6px 8px;
-  cursor: default;
+.page-info {
+  color: white;
+  font-size: 1rem;
+  min-width: 80px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
@@ -348,34 +323,23 @@ onUnmounted(() => {
   }
 
   .pagination-controls {
+    display: flex;
     padding: 5px;
-    gap: 5px;
+    gap: 8px;
     margin-top: 5px;
   }
 
-  .page-button,
-  .page-number {
-    padding: 4px 8px;
-    min-width: 30px;
-    font-size: 0.8rem;
-  }
-
-  .page-button:first-child,
-  .page-button:last-child {
-    display: none;
-  }
-
-  .pagination-controls {
-    display: flex;  /* 반드시 표시되도록 설정 */
-    padding: 5px;
-    gap: 8px;
-  }
-
   .page-button {
-    display: block;  /* 버튼이 항상 표시되도록 설정 */
+    display: block;
     padding: 4px 8px;
     min-width: 50px;
     font-size: 0.9rem;
+  }
+
+  .page-info {
+    font-size: 0.9rem;
+    min-width: 60px;
+    color: white;
   }
 }
 </style>
