@@ -1,38 +1,35 @@
 <template>
   <div class="table-container" ref="tableContainer">
     <div class="white-container" :style="whiteContainerStyle">
-      <div class="poster-container" v-for="movie in displayMovies" :key="movie.id" :style="posterContainerStyle">
+      <div class="poster-container" 
+           v-for="movie in displayMovies" 
+           :key="movie.id" 
+           :style="posterContainerStyle">
         <div class="poster-wrapper">
-          <component :is="isMobile ? PosterMobile : Poster" :movie="movie" class="poster-item" />
+          <component 
+            :is="isMobile ? PosterMobile : Poster" 
+            :movie="movie"
+            class="poster-item"
+          />
         </div>
       </div>
     </div>
 
     <div class="pagination-controls">
-      <button @click="goToFirstPage" :disabled="currentPage === 1" class="page-button">
-        «
-      </button>
-      <button @click="prevPage" :disabled="currentPage === 1" class="page-button">
+      <button 
+        @click="prevPage" 
+        :disabled="currentPage === 1"
+        class="page-button"
+      >
         이전
       </button>
-      
-      <div class="page-numbers">
-        <button 
-          v-for="pageNum in displayedPages" 
-          :key="pageNum"
-          @click="goToPage(pageNum)"
-          :class="['page-number', { active: currentPage === pageNum, ellipsis: pageNum === '...' }]"
-          :disabled="pageNum === '...'"
-        >
-          {{ pageNum }}
-        </button>
-      </div>
-
-      <button @click="nextPage" :disabled="currentPage === calculatedTotalPages" class="page-button">
+      <span class="page-info">{{ currentPage }} / {{ calculatedTotalPages }}</span>
+      <button 
+        @click="nextPage" 
+        :disabled="currentPage === calculatedTotalPages"
+        class="page-button"
+      >
         다음
-      </button>
-      <button @click="goToLastPage" :disabled="currentPage === calculatedTotalPages" class="page-button">
-        »
       </button>
     </div>
   </div>
@@ -49,15 +46,15 @@ const CONFIG = {
   desktop: {
     posterWidth: 220,
     posterHeight: 340,
-    gap: 20,
-    padding: 40,  // 증가
+    gap: 10,
+    padding: 20,
     innerPadding: 10
   },
   mobile: {
     posterWidth: 165,
     posterHeight: 255,
-    gap: 10,
-    padding: 20,  // 증가
+    gap: 5,
+    padding: 10,
     innerPadding: 8
   }
 };
@@ -66,7 +63,6 @@ const props = defineProps({
   baseURL: { type: String, required: true }
 });
 
-// State
 const movies = ref([]);
 const currentPage = ref(1);
 const totalResults = ref(0);
@@ -75,7 +71,6 @@ const tableContainer = ref(null);
 const gridDimensions = ref({ columns: 0, rows: 0 });
 let resizeObserver = null;
 
-// Computed
 const config = computed(() => isMobile.value ? CONFIG.mobile : CONFIG.desktop);
 
 const posterContainerStyle = computed(() => ({
@@ -87,14 +82,13 @@ const posterContainerStyle = computed(() => ({
 const whiteContainerStyle = computed(() => {
   const { posterWidth, posterHeight, gap, padding } = config.value;
   const { columns, rows } = gridDimensions.value;
-
+  
   const contentWidth = (columns * posterWidth) + ((columns - 1) * gap);
   const contentHeight = (rows * posterHeight) + ((rows - 1) * gap);
-
-  // 컨테이너를 내부 콘텐츠보다 크게 설정
+  
   const totalWidth = contentWidth + (padding * 2);
   const totalHeight = contentHeight + (padding * 2);
-
+  
   return {
     width: `${totalWidth}px`,
     height: `${totalHeight}px`,
@@ -103,12 +97,11 @@ const whiteContainerStyle = computed(() => {
   };
 });
 
-// [이하 코드는 이전과 동일]
-const itemsPerPage = computed(() =>
+const itemsPerPage = computed(() => 
   gridDimensions.value.columns * gridDimensions.value.rows
 );
 
-const calculatedTotalPages = computed(() =>
+const calculatedTotalPages = computed(() => 
   Math.ceil(totalResults.value / itemsPerPage.value) || 1
 );
 
@@ -117,13 +110,42 @@ const displayMovies = computed(() => {
   return movies.value.slice(start, start + itemsPerPage.value);
 });
 
+const displayedPageNumbers = computed(() => {
+  const total = calculatedTotalPages.value;
+  const current = currentPage.value;
+  let pages = [];
+
+  pages.push(1);
+
+  let start = Math.max(2, current - 1);
+  let end = Math.min(total - 1, current + 1);
+
+  if (start > 2) {
+    pages.push('...');
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  if (end < total - 1) {
+    pages.push('...');
+  }
+
+  if (total > 1) {
+    pages.push(total);
+  }
+
+  return pages;
+});
+
 const calculateGridDimensions = () => {
   if (!tableContainer.value) return { columns: 1, rows: 1 };
 
   const { posterWidth, posterHeight, gap, padding } = config.value;
   const containerPadding = isMobile.value ? 20 : 40;
   const paginationHeight = isMobile.value ? 60 : 100;
-
+  
   const availableWidth = tableContainer.value.clientWidth - containerPadding - (padding * 2);
   const availableHeight = tableContainer.value.clientHeight - paginationHeight - (padding * 2);
 
@@ -134,57 +156,6 @@ const calculateGridDimensions = () => {
     columns: Math.max(1, columns),
     rows: Math.max(1, rows)
   };
-};
-
-// 페이지네이션 관련 computed 추가
-const displayedPages = computed(() => {
-  const total = calculatedTotalPages.value;
-  const current = currentPage.value;
-  let pages = [];
-
-  // 항상 첫 페이지 표시
-  pages.push(1);
-
-  // 현재 페이지 주변 페이지 계산
-  let start = Math.max(2, current - 1);
-  let end = Math.min(total - 1, current + 1);
-
-  // 첫 페이지와 시작 페이지 사이에 간격이 있는 경우
-  if (start > 2) {
-    pages.push('...');
-  }
-
-  // 중간 페이지들 추가
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  // 마지막 페이지와 끝 페이지 사이에 간격이 있는 경우
-  if (end < total - 1) {
-    pages.push('...');
-  }
-
-  // 항상 마지막 페이지 표시 (첫 페이지가 아닌 경우)
-  if (total > 1) {
-    pages.push(total);
-  }
-
-  return pages;
-});
-
-// 페이지 이동 함수들
-const goToPage = (page) => {
-  if (typeof page === 'number' && page !== currentPage.value) {
-    currentPage.value = page;
-  }
-};
-
-const goToFirstPage = () => {
-  currentPage.value = 1;
-};
-
-const goToLastPage = () => {
-  currentPage.value = calculatedTotalPages.value;
 };
 
 const updateGridLayout = async () => {
@@ -204,9 +175,9 @@ const fetchMovies = async (page) => {
     const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
     movies.value = [...movies.value, ...newMovies];
     totalResults.value = total;
-
-    if (movies.value.length - (currentPage.value * itemsPerPage.value) < 100
-      && movies.value.length < totalResults.value) {
+    
+    if (movies.value.length - (currentPage.value * itemsPerPage.value) < 100 
+        && movies.value.length < totalResults.value) {
       await fetchMovies(page + 1);
     }
   } catch (error) {
@@ -214,39 +185,41 @@ const fetchMovies = async (page) => {
   }
 };
 
-const navigation = {
-  prev: () => currentPage.value > 1 && currentPage.value--,
-  next: async () => {
-    if (currentPage.value < calculatedTotalPages.value) {
-      currentPage.value++;
-      const neededMovies = (currentPage.value + 1) * itemsPerPage.value;
-      if (movies.value.length < neededMovies) {
-        await fetchMovies(Math.ceil(movies.value.length / itemsPerPage.value) + 1);
-      }
-    }
+const goToPage = async (page) => {
+  if (page === '...' || page === currentPage.value) return;
+  
+  currentPage.value = page;
+  const neededMovies = (currentPage.value + 1) * itemsPerPage.value;
+  if (movies.value.length < neededMovies) {
+    await fetchMovies(Math.ceil(movies.value.length / itemsPerPage.value) + 1);
   }
 };
+
+const goToFirstPage = () => goToPage(1);
+const goToLastPage = () => goToPage(calculatedTotalPages.value);
+const prevPage = () => currentPage.value > 1 && goToPage(currentPage.value - 1);
+const nextPage = () => currentPage.value < calculatedTotalPages.value && goToPage(currentPage.value + 1);
 
 onMounted(async () => {
   isMobile.value = window.innerWidth < 768;
   await nextTick();
   updateGridLayout();
-
-  window.addEventListener('resize', () =>
+  
+  window.addEventListener('resize', () => 
     requestAnimationFrame(() => {
       isMobile.value = window.innerWidth < 768;
       updateGridLayout();
     })
   );
-
-  resizeObserver = new ResizeObserver(() =>
+  
+  resizeObserver = new ResizeObserver(() => 
     requestAnimationFrame(updateGridLayout)
   );
-
+  
   if (tableContainer.value) {
     resizeObserver.observe(tableContainer.value);
   }
-
+  
   fetchMovies(1);
 });
 
@@ -254,8 +227,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateGridLayout);
   resizeObserver?.disconnect();
 });
-
-const { prev: prevPage, next: nextPage } = navigation;
 </script>
 
 <style scoped>
@@ -279,6 +250,7 @@ const { prev: prevPage, next: nextPage } = navigation;
   margin-bottom: 4px;
   justify-content: center;
   align-items: center;
+  gap: inherit;
 }
 
 .poster-container {
@@ -289,7 +261,6 @@ const { prev: prevPage, next: nextPage } = navigation;
   box-sizing: border-box;
   border-radius: 8px;
   background: transparent;
-  /* 투명하게 변경 */
 }
 
 .poster-wrapper {
@@ -309,38 +280,62 @@ const { prev: prevPage, next: nextPage } = navigation;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px;
-  gap: 20px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border-radius: 10px;
-  margin-top: auto;
+  padding: 10px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.page-button {
-  padding: 8px 16px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  min-width: 80px;
-}
-
-.page-button:disabled {
-  background-color: #666;
-  cursor: not-allowed;
-}
-
-.page-button:hover:not(:disabled) {
-  background-color: #444;
+.page-numbers {
+  display: flex;
+  gap: 5px;
+  align-items: center;
 }
 
 .page-info {
   color: white;
-  font-size: 1.1rem;
-  min-width: 100px;
+  font-size: 1rem;
+  min-width: 80px;
   text-align: center;
+}
+
+.page-button {
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.page-button,
+.page-number {
+  padding: 6px 12px;
+  background: none;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 40px;
+  font-size: 0.9rem;
+}
+
+.page-button:hover:not(:disabled),
+.page-number:hover:not(:disabled):not(.active):not(.ellipsis) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.page-button:disabled,
+.page-number:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-number.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.page-number.ellipsis {
+  border: none;
+  padding: 6px 8px;
+  cursor: default;
 }
 
 @media (max-width: 768px) {
@@ -350,25 +345,37 @@ const { prev: prevPage, next: nextPage } = navigation;
 
   .white-container {
     margin-bottom: 4px;
-    justify-content: center;
-    align-items: center;
   }
 
   .pagination-controls {
-    padding: 8px;
+    padding: 5px;
+    gap: 5px;
+    margin-top: 5px;
+  }
+
+  .page-button,
+  .page-number {
+    padding: 4px 8px;
+    min-width: 30px;
+    font-size: 0.8rem;
+  }
+
+  .page-button:first-child,
+  .page-button:last-child {
+    display: none;
+  }
+
+  .pagination-controls {
+    display: flex;  /* 반드시 표시되도록 설정 */
+    padding: 5px;
     gap: 8px;
-    margin-top: 4px;
   }
 
   .page-button {
+    display: block;  /* 버튼이 항상 표시되도록 설정 */
     padding: 4px 8px;
-    font-size: 0.9rem;
     min-width: 50px;
-  }
-
-  .page-info {
     font-size: 0.9rem;
-    min-width: 70px;
   }
 }
 </style>
