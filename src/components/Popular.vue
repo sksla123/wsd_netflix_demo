@@ -1,5 +1,5 @@
 <template>
-  <div class="popular-container">
+  <div class="popular-container" :style="{ height: `${availableHeight}px`, maxHeight: `${availableHeight}px` }">
     <h2 class="title">지금 뜨는 콘텐츠</h2>
     <div class="table-wrapper">
       <PageTable 
@@ -15,10 +15,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import PageTable from '../components/common/view/PageTable.vue';
 import { getBaseMovieUrl } from '../components/common/api/url';
+
+const props = defineProps({
+  availableHeight: Number,
+  availableWidth: Number
+});
 
 const store = useStore();
 const apiKey = computed(() => store.state.userAPIKey);
@@ -28,13 +33,13 @@ const baseURL = computed(() => {
 });
 </script>
 
-
 <style scoped>
 .popular-container {
   width: 100%;
-  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .title {
