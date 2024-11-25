@@ -32,16 +32,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { getMovieDatas, processMovieAndMetaData } from '../api/api';
-import { getMovieUrl } from '../api/url';
+import { addPage2MovieUrl } from '../api/url';
 import Poster from './Poster.vue';
 import PosterMobile from './PosterMobile.vue';
 
 const props = defineProps({
   baseURL: {
-    type: String,
-    required: true
-  },
-  apiKey: {
     type: String,
     required: true
   }
@@ -80,7 +76,7 @@ const checkScreenSize = () => {
 };
 
 const fetchMovies = async (page) => {
-  const url = getMovieUrl(props.apiKey, props.baseURL, page);
+  const url = addPage2MovieUrl(props.baseURL, page);
   const result = await getMovieDatas(url);
   const processedData = processMovieAndMetaData(result);
   
