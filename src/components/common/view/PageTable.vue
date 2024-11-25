@@ -3,11 +3,15 @@
     <div class="white-container">
       <div class="movie-grid" ref="gridContainer" :style="gridStyle">
         <template v-for="movie in displayMovies" :key="movie.id">
-          <component 
-            :is="isMobile ? PosterMobile : Poster" 
-            :movie="movie"
-            class="poster-item"
-          />
+          <div class="poster-container">
+            <div class="poster-wrapper">
+              <component 
+                :is="isMobile ? PosterMobile : Poster" 
+                :movie="movie"
+                class="poster-item"
+              />
+            </div>
+          </div>
         </template>
       </div>
     </div>
@@ -39,20 +43,20 @@ import { addPage2MovieUrl } from '../api/url';
 import Poster from './Poster.vue';
 import PosterMobile from './PosterMobile.vue';
 
-const POSTER_CONFIG = {
+const CONTAINER_CONFIG = {
   desktop: {
-    width: 200,
-    height: 300,
-    totalHeight: 350,
+    width: 220,  // 포스터 너비 + 패딩
+    height: 370, // 포스터 높이 + 패딩 + 타이틀 영역
     gap: 20,
-    padding: 20
+    padding: 20,
+    innerPadding: 10  // 포스터와 컨테이너 사이 간격
   },
   mobile: {
-    width: 150,
-    height: 225,
-    totalHeight: 245,
+    width: 165,  // 포스터 너비 + 패딩
+    height: 265, // 포스터 높이 + 패딩 + 타이틀 영역
     gap: 5,
-    padding: 2
+    padding: 2,
+    innerPadding: 8   // 포스터와 컨테이너 사이 간격
   }
 };
 
@@ -75,7 +79,7 @@ let resizeObserver = null;
 const calculateGridDimensions = () => {
   if (!tableContainer.value) return { columns: 1, rows: 1 };
 
-  const config = isMobile.value ? POSTER_CONFIG.mobile : POSTER_CONFIG.desktop;
+  const config = isMobile.value ? CONTAINER_CONFIG.mobile : CONTAINER_CONFIG.desktop;
   const containerPadding = isMobile.value ? 4 : 40;
   const paginationHeight = isMobile.value ? 40 : 100;
   
@@ -86,7 +90,7 @@ const calculateGridDimensions = () => {
   const usableHeight = containerHeight - (config.padding * 2);
 
   const maxColumns = Math.floor((usableWidth + config.gap) / (config.width + config.gap));
-  const maxRows = Math.floor((usableHeight + config.gap) / (config.totalHeight + config.gap));
+  const maxRows = Math.floor((usableHeight + config.gap) / (config.height + config.gap));
 
   return {
     columns: Math.max(1, maxColumns),
@@ -95,7 +99,7 @@ const calculateGridDimensions = () => {
 };
 
 const gridStyle = computed(() => {
-  const config = isMobile.value ? POSTER_CONFIG.mobile : POSTER_CONFIG.desktop;
+  const config = isMobile.value ? CONTAINER_CONFIG.mobile : CONTAINER_CONFIG.desktop;
   const totalWidth = (gridDimensions.value.columns * config.width) + 
                     ((gridDimensions.value.columns - 1) * config.gap);
   
@@ -253,9 +257,26 @@ onUnmounted(() => {
   align-items: start;
 }
 
+.poster-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
+.poster-wrapper {
+  width: calc(100% - var(--inner-padding) * 2);
+  height: calc(100% - var(--inner-padding) * 2);
+  margin: var(--inner-padding);
+}
+
 .poster-item {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .pagination-controls {
@@ -321,5 +342,13 @@ onUnmounted(() => {
     font-size: 0.9rem;
     min-width: 70px;
   }
+
+  .poster-container {
+    --inner-padding: 8px;
+  }
+}
+
+:root {
+  --inner-padding: 10px;
 }
 </style>
