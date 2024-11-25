@@ -56,8 +56,8 @@ const currentView = computed(() =>
 );
 
 const containerStyle = computed(() => ({
-  height: isInfinityView.value ? 'auto' : `${props.availableHeight}px`,
-  maxHeight: isInfinityView.value ? 'none' : `${props.availableHeight}px`
+  height: `${props.availableHeight}px`,
+  maxHeight: `${props.availableHeight}px`
 }));
 </script>
 

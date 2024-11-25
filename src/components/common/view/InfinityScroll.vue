@@ -1,6 +1,6 @@
 <template>
     <div class="infinity-scroll-container" ref="scrollContainer">
-        <div class="white-container" :style="containerStyle">
+        <div class="white-container" :style="{ ...containerStyle, height: `${containerHeight}px` }">
             <div v-for="movie in movies" :key="movie.id" class="poster-wrapper" :style="posterStyle">
                 <PosterMobile :movie="movie" class="poster-item" />
             </div>
@@ -34,6 +34,8 @@ const totalResults = ref(0);
 const currentPage = ref(1);
 const scrollContainer = ref(null);
 const containerWidth = ref(0);
+const containerHeight = ref(0); // white-container의 높이를 저장
+
 const init_flag = ref(true);
 
 const grid = computed(() => {
@@ -58,8 +60,7 @@ const posterStyle = computed(() => ({
 }));
 
 const loadMoreMovies = async () => {
-    if (!init_flag && movies.value.length >= totalResults.value) return;
-    // if (movies.value.length >= totalResults.value) return;
+    if (!init_flag.value && movies.value.length >= totalResults.value) return;
 
     const url = addPage2MovieUrl(props.baseURL, currentPage.value);
     const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
@@ -82,9 +83,10 @@ const scrollToTop = () => {
     }
 };
 
-const updateContainerWidth = () => {
+const updateContainerSize = () => {
     if (scrollContainer.value) {
         containerWidth.value = scrollContainer.value.clientWidth;
+        containerHeight.value = scrollContainer.value.clientHeight; // white-container 높이를 업데이트
     }
 };
 
@@ -93,18 +95,19 @@ onMounted(async () => {
     movies.value = initialData.movies;
     totalResults.value = initialData.totalResults;
 
-    for (let i = 0; i< 9; i++) {
+    for (let i = 0; i < 9; i++) {
         await loadMoreMovies();
     }
+    
     init_flag.value = false;
 
     scrollContainer.value.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', updateContainerWidth);
-    updateContainerWidth();
+    window.addEventListener('resize', updateContainerSize);
+    updateContainerSize();
 });
 
 onUnmounted(() => {
-    window.removeEventListener('resize', updateContainerWidth);
+    window.removeEventListener('resize', updateContainerSize);
     if (scrollContainer.value) {
         scrollContainer.value.removeEventListener('scroll', handleScroll);
     }
@@ -115,7 +118,7 @@ onUnmounted(() => {
 .infinity-scroll-container {
     position: relative;
     overflow-y: auto;
-    height: calc(100vh - 40px);
+    height: calc(100vh - 40px); /* infinity-scroll-container의 높이 */
     display: flex;
     justify-content: center;
 }
@@ -128,11 +131,6 @@ onUnmounted(() => {
     flex-wrap: wrap;
     justify-content: center;
     align-content: flex-start;
-    height: 110%;
-    gap: 10px;
-    /* LAYOUT.spacing.gap과 동일하게 설정 */
-    padding: 20px;
-    /* LAYOUT.spacing.padding과 동일하게 설정 */
 }
 
 .poster-wrapper {
@@ -158,6 +156,6 @@ onUnmounted(() => {
 }
 
 .scroll-top-button i {
-    font-size: 1.5rem;
+   font-size: 1.5rem;
 }
 </style>
