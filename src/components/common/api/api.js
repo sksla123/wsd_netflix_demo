@@ -49,3 +49,14 @@ export function processMovieData(data) {
 
     return movies;
 }
+
+export function processMovieAndMetaData(data) {
+    const movies = processMovieData(data);
+
+    return {
+        movies,
+        page: data.page,
+        totalPages: data.total_pages,
+        totalResults: data.total_results
+    };
+}
