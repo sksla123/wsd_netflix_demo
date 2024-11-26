@@ -47,7 +47,6 @@ const displayMovies = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
     const movies = props.movies.slice(start, start + itemsPerPage.value);
     
-    // 현재 페이지에 표시할 영화가 없는 경우
     if (movies.length === 0 && currentPage.value > 1) {
         currentPage.value = currentPage.value - 1;
         return props.movies.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value);
@@ -64,16 +63,15 @@ const posterStyle = computed(() => ({
 
 const containerStyle = computed(() => {
     const { width, height } = LAYOUT.poster;
-    const { gap, padding } = LAYOUT.spacing;
+    const { gap } = LAYOUT.spacing; // Removed padding from here
     const { columns, rows } = grid.value;
 
     const contentWidth = (columns * width) + ((columns - 1) * gap);
     const contentHeight = (rows * height) + ((rows - 1) * gap);
 
     return {
-        width: `${contentWidth + padding * 2}px`,
-        height: `${contentHeight + padding * 2}px`,
-        padding: `${padding}px`,
+        width: `${contentWidth}px`,
+        height: `${contentHeight}px`,
         gap: `${gap}px`
     };
 });
@@ -113,12 +111,12 @@ const updateLayout = () => {
     if (!tableContainer.value) return;
 
     const { width, height } = LAYOUT.poster;
-    const { gap, padding } = LAYOUT.spacing;
+    const { gap } = LAYOUT.spacing; // Removed padding from here
     const containerPadding = 40;
     const paginationHeight = 80;
 
-    const availableWidth = tableContainer.value.clientWidth - containerPadding - (padding * 2);
-    const availableHeight = tableContainer.value.clientHeight - paginationHeight - (padding * 2);
+    const availableWidth = tableContainer.value.clientWidth - containerPadding;
+    const availableHeight = tableContainer.value.clientHeight - paginationHeight;
 
     grid.value = {
         columns: Math.max(1, Math.floor((availableWidth + gap) / (width + gap))),
@@ -157,100 +155,45 @@ onMounted(() => {
     height: 100%;
     width: 100%;
     position: relative;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
 .white-container {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     overflow: hidden;
-    margin: 0 auto 10px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    align-content: flex-start;  /* 이 줄 추가 */
-    gap: inherit;
+    margin: auto; /* Center the container */
 }
 
 .poster-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
-    border-radius: 8px;
 }
 
 .poster-item {
     width: 100%;
     height: 100%;
-    object-fit: cover;
 }
 
 .pagination {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-    padding: 10px;
 }
 
 .page-button,
 .page-number {
     min-width: 40px;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    color: white;
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.3s ease;
 }
 
 .page-button:hover:not(:disabled),
 .page-number:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.1);
 }
 
-.page-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+.page-button:disabled {}
 
-.page-number.active {
-    background-color: rgba(255, 255, 255, 0.3);
-}
+.page-number.active {}
 
-.ellipsis {
-    color: white;
-    font-size: 0.9rem;
-    padding: 6px 12px;
-}
+.ellipsis {}
 
-@media (max-width: 768px) {
-    .table-container {
-        padding: 10px;
-    }
-
-    .pagination {
-        gap: 5px;
-        margin-top: 5px;
-        padding: 5px;
-    }
-
-    .page-button,
-    .page-number {
-        min-width: 30px;
-        padding: 4px 8px;
-        font-size: 0.8rem;
-    }
-
-    .ellipsis {
-        padding: 4px 8px;
-        font-size: 0.8rem;
-    }
-}
+@media (max-width: 768px) {}
 </style>

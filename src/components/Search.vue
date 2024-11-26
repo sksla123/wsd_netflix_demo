@@ -12,7 +12,7 @@
     <div class="container filter-container">
       <div class="filter-buttons">
         <button @click="toggleFilter" class="filter-toggle" :class="{ active: showFilter }">필터</button>
-        <button @click="resetFilter" class="filter-reset">초기화</button>
+        <button @click="resetFilterAndClose" class="filter-reset">초기화</button>
       </div>
       <div v-if="showFilter" class="filter-dropdown">
         <!-- 평점 필터 -->
@@ -105,6 +105,11 @@ const resetFilter = () => {
   star_end.value = 10;
   selected_genre_ids.value = [];
   selectedLanguage.value = 'ko';
+};
+
+const resetFilterAndClose = () => {
+  resetFilter();
+  showFilter.value = false;
 };
 
 const toggleGenre = (genreId) => {
@@ -209,7 +214,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
     width: 90%;
   }
   .filter-dropdown {
-    width: 100% !important;
+    width: 70% !important;
   }
 }
 
@@ -254,8 +259,8 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   background-color: black;
   padding: 15px;
   border-radius: 5px;
-  margin-top: 2px;
   width: 50%;
+  max-width: 70%;
 }
 
 .filter-section {
@@ -268,7 +273,8 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 .range-slider-container {
-  width: 100%;
+  width: 80%;
+  max-width: 300px;
   margin: 0;
   text-align: left;
 }
@@ -331,6 +337,11 @@ button {
   border-radius: 5px;
   transition: background-color 0.3s ease;
   font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:hover {
+  background-color: #333;
 }
 
 button.active {
@@ -338,8 +349,9 @@ button.active {
   color: white;
 }
 
-button:hover:not(:disabled) {
-  background-color: #555;
+.filter-dropdown button.active {
+  background-color: red;
+  color: black;
 }
 
 button:disabled {

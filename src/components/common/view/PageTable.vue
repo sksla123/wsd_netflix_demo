@@ -69,8 +69,8 @@ const containerStyle = computed(() => {
   const contentHeight = (rows * height) + ((rows - 1) * gap);
 
   return {
-    width: `${contentWidth + padding * 2}px`,
-    height: `${contentHeight + padding * 2}px`,
+    width: `${contentWidth}px`,
+    height: `${contentHeight}px`,
     padding: `${padding}px`,
     gap: `${gap}px`
   };
@@ -82,7 +82,6 @@ const displayedPageNumbers = computed(() => {
   const result = [];
 
   if (current <= 2) {
-    // 현재 1~2 페이지인 경우
     for (let i = 1; i <= Math.min(3, total); i++) {
       result.push(i);
     }
@@ -90,7 +89,6 @@ const displayedPageNumbers = computed(() => {
       result.push('...');
     }
   } else if (current >= total - 1) {
-    // 현재 마지막 전 ~ 마지막 페이지인 경우
     if (total > 3) {
       result.push('...');
     }
@@ -98,7 +96,6 @@ const displayedPageNumbers = computed(() => {
       result.push(i);
     }
   } else {
-    // 그 외 경우
     result.push('...');
     for (let i = current - 1; i <= current + 1; i++) {
       result.push(i);
@@ -118,8 +115,8 @@ const updateLayout = () => {
   const containerPadding = 40;
   const paginationHeight = 80;
 
-  const availableWidth = tableContainer.value.clientWidth - containerPadding - (padding * 2);
-  const availableHeight = tableContainer.value.clientHeight - paginationHeight - (padding * 2);
+  const availableWidth = tableContainer.value.clientWidth - containerPadding;
+  const availableHeight = tableContainer.value.clientHeight - paginationHeight;
 
   grid.value = {
     columns: Math.max(1, Math.floor((availableWidth + gap) / (width + gap))),
@@ -194,7 +191,6 @@ onMounted(() => {
   justify-content: center;
   align-items: flex-start;
   align-content: flex-start;
-  gap: inherit;
 }
 
 .poster-container {
