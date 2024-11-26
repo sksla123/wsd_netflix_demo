@@ -17,14 +17,13 @@
       <div v-if="showFilter" class="filter-dropdown">
         <!-- 평점 필터 -->
         <div class="filter-section">
-          <h3>평점: {{ star_start.toFixed(1) }} - {{ star_end.toFixed(1) }}</h3>
+          <h3>평점: {{ star_start }} - {{ star_end }}</h3>
           <div class="range-slider-container">
             <div class="range-slider">
               <div class="range-slider-track"></div>
-              <div class="range-slider-thumb start" :style="{ left: `${(star_start / 10) * 100}%` }"></div>
-              <div class="range-slider-thumb end" :style="{ left: `${(star_end / 10) * 100}%` }"></div>
-              <input type="range" min="0" max="10" step="0.1" v-model.number="star_start" @input="updateRating('start')">
-              <input type="range" min="0" max="10" step="0.1" v-model.number="star_end" @input="updateRating('end')">
+              <div class="range-slider-fill" :style="{ left: `${star_start * 10}%`, width: `${(star_end - star_start) * 10}%` }"></div>
+              <div class="range-slider-thumb start" :style="{ left: `${star_start * 10}%` }" @mousedown="startDrag('start')" @touchstart="startDrag('start')"></div>
+              <div class="range-slider-thumb end" :style="{ left: `${star_end * 10}%` }" @mousedown="startDrag('end')" @touchstart="startDrag('end')"></div>
             </div>
             <div class="range-marks">
               <span v-for="i in 11" :key="i" class="range-mark">{{ i - 1 }}</span>
@@ -125,14 +124,6 @@ const selectLanguage = (lang) => {
   selectedLanguage.value = lang;
 };
 
-const updateRating = (type) => {
-  if (type === 'start' && star_start.value > star_end.value) {
-    star_start.value = star_end.value;
-  } else if (type === 'end' && star_end.value < star_start.value) {
-    star_end.value = star_start.value;
-  }
-};
-
 const fetchGenres = async () => {
   const genreUrl = getBaseMovieUrl(apiKey.value, '/genre/movie/list');
   try {
@@ -143,37 +134,58 @@ const fetchGenres = async () => {
   }
 };
 
-const fix_range_thumb_behavior = () => {
-  // Ensure that the range thumbs have active events set correctly
-  // Making sure the range passwords can move properly.
-  const rangeInputs = document.querySelectorAll('input[type="range"]');
-  rangeInputs.forEach(input => {
-    input.addEventListener('touchstart', () => {
-      input.style.pointerEvents = 'auto';
-    });
-    input.addEventListener('touchend', () => {
-      input.style.pointerEvents = 'none';
-    });
-  });
+let isDragging = false;
+let currentThumb = null;
+
+const startDrag = (thumb) => {
+  isDragging = true;
+  currentThumb = thumb;
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchmove', drag);
+  document.addEventListener('touchend', stopDrag);
 };
 
-const update_button_styles = () => {
-  // Ensure that the button style changes immediately on touch for mobile.
+const drag = (e) => {
+  if (!isDragging) return;
+  
+  const rangeSlider = document.querySelector('.range-slider');
+  const rect = rangeSlider.getBoundingClientRect();
+  const x = (e.clientX || e.touches[0].clientX) - rect.left;
+  let percentage = Math.min(Math.max(x / rect.width, 0), 1);
+  
+  if (currentThumb === 'start') {
+    star_start.value = Math.min(Math.round(percentage * 10), star_end.value);
+  } else {
+    star_end.value = Math.max(Math.round(percentage * 10), star_start.value);
+  }
+};
+
+const stopDrag = () => {
+  isDragging = false;
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchmove', drag);
+  document.removeEventListener('touchend', stopDrag);
+};
+
+const setupEventListeners = () => {
   const buttons = document.querySelectorAll('button');
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   buttons.forEach(button => {
-    button.addEventListener('touchstart', () => {
-      button.classList.add('active');
-    });
-    button.addEventListener('touchend', () => {
-      button.classList.remove('active');
-    });
+    if (isMobile) {
+      button.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        button.click();
+      }, { passive: false });
+    }
   });
 };
 
 onMounted(() => {
   fetchGenres();
-  fix_range_thumb_behavior();
-  update_button_styles();
+  setupEventListeners();
 });
 
 watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
@@ -196,6 +208,9 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   .container {
     width: 90%;
   }
+  .filter-dropdown {
+    width: 100% !important;
+  }
 }
 
 .search-container {
@@ -210,9 +225,11 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 .search-bar input {
   width: 100%;
   padding: 10px 15px;
+  padding-right: 40px;
   border-radius: 20px;
   border: none;
   background-color: white;
+  box-sizing: border-box;
 }
 
 .search-bar i {
@@ -237,7 +254,8 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   background-color: black;
   padding: 15px;
   border-radius: 5px;
-  margin-top: 5px;
+  margin-top: 2px;
+  width: 50%;
 }
 
 .filter-section {
@@ -250,8 +268,8 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 .range-slider-container {
-  width: 200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   text-align: left;
 }
 
@@ -271,6 +289,14 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   background: #ddd;
 }
 
+.range-slider-fill {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: #ff0000;
+}
+
 .range-slider-thumb {
   position: absolute;
   top: 50%;
@@ -281,37 +307,6 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 2;
-}
-
-.range-slider input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  pointer-events: auto;
-}
-
-.range-slider input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.range-slider input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
 }
 
 .range-marks {
@@ -339,8 +334,8 @@ button {
 }
 
 button.active {
-  background-color: red;
-  color: black;
+  background-color: black;
+  color: white;
 }
 
 button:hover:not(:disabled) {
@@ -353,7 +348,8 @@ button:disabled {
 }
 
 .filter-reset {
-  background-color: black;
+  background-color: red;
+  color: black;
 }
 
 .page-table-container {
