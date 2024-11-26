@@ -51,16 +51,20 @@
             <button @click="selectLanguage('en')" :class="{ active: selectedLanguage === 'en' }">영어</button>
           </div>
         </div>
+
+        <!-- 적용 버튼 -->
+        <div class="apply-button-container">
+          <button @click="applyFilter" class="apply-button">적용</button>
+        </div>
       </div>
     </div>
 
     <!-- 페이지 테이블 컨테이너 -->
     <div class="container page-table-container" :class="{ 'pushed-down': showFilter }">
-      <PageTable :baseURL="baseURL" />
+      <PageTable :key="tableKey" :baseURL="movieUrl" />
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
@@ -75,21 +79,24 @@ const selected_genre_ids = ref([]);
 const selectedLanguage = ref('ko');
 const genres = ref([]);
 const showFilter = ref(false);
+const tableKey = ref(0);
 
 const star_start = ref(0);
 const star_end = ref(10);
 
 const apiKey = computed(() => store.state.userAPIKey);
 
-const baseURL = computed(() => {
-  let url = getBaseMovieUrl(apiKey.value, '/discover/movie');
+const movieUrl = computed(() => {
+  const language = selectedLanguage.value === 'ko' ? '&language=ko-KR' : '&language=en-US';
+  let url = getBaseMovieUrl(apiKey.value, '/discover/movie', language);
   
   if (selected_genre_ids.value.length > 0) {
-    url = addExtraQuery2MovieUrl(url, `&with_genres=${selected_genre_ids.value.join(',')}`);
+    url = addExtraQuery2MovieUrl(url, `&with_genres=${selected_genre_ids.value.join('|')}`);
   }
 
-  url = addExtraQuery2MovieUrl(url, `&with_original_language=${selectedLanguage.value}`);
   url = addExtraQuery2MovieUrl(url, `&vote_average.gte=${star_start.value}&vote_average.lte=${star_end.value}`);
+
+  console.log('Generated URL:', url); // URL 로깅
 
   return url;
 });
@@ -111,6 +118,7 @@ const resetFilter = () => {
 const resetFilterAndClose = () => {
   resetFilter();
   showFilter.value = false;
+  refreshTable();
 };
 
 const toggleGenre = (genreId) => {
@@ -198,13 +206,21 @@ const setupEventListeners = () => {
   });
 };
 
+const applyFilter = () => {
+  refreshTable();
+};
+
+const refreshTable = () => {
+  tableKey.value += 1;
+};
+
 onMounted(() => {
   fetchGenres();
   setupEventListeners();
 });
 
 watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
-  // URL 업데이트 로직
+  // URL 업데이트 로직은 이제 movieUrl computed 속성에서 자동으로 처리됩니다.
 });
 </script>
 
@@ -220,13 +236,11 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 @media (max-width: 768px) {
+  .container {
+    width: 90%;
+  }
   .filter-dropdown {
     width: 70% !important;
-  }
-  .page-table-container {
-    width: 100%;
-    padding: 0;
-    box-sizing: border-box;
   }
 }
 
@@ -258,18 +272,20 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 .filter-container {
-  /* margin-bottom: 20px; */
+  margin-bottom: 20px;
 }
 
 .filter-buttons {
   display: flex;
   gap: 2px;
+  margin-bottom: 5px;
 }
 
 .filter-dropdown {
   background-color: black;
   padding: 15px;
   border-radius: 5px;
+  margin-top: 5px;
   width: 50%;
   max-width: 70%;
 }
@@ -286,7 +302,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 .range-slider-container {
   width: 80%;
   max-width: 300px;
-  margin: 0;
+  margin: 20px 0;
   text-align: left;
 }
 
@@ -373,6 +389,18 @@ button:disabled {
 .filter-reset {
   background-color: red;
   color: black;
+}
+
+.apply-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.apply-button {
+  background-color: white;
+  color: black;
+  border-radius: 5px;
+  font-weight: bold;
 }
 
 .page-table-container {
