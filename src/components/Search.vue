@@ -143,14 +143,37 @@ const fetchGenres = async () => {
   }
 };
 
-const enableThumbMovement = () => {
-  // 이 함수는 thumb 이동을 활성화하는 로직을 구현해야 합니다.
-  // 현재 구현은 생략되어 있습니다.
+const fix_range_thumb_behavior = () => {
+  // Ensure that the range thumbs have active events set correctly
+  // Making sure the range passwords can move properly.
+  const rangeInputs = document.querySelectorAll('input[type="range"]');
+  rangeInputs.forEach(input => {
+    input.addEventListener('touchstart', () => {
+      input.style.pointerEvents = 'auto';
+    });
+    input.addEventListener('touchend', () => {
+      input.style.pointerEvents = 'none';
+    });
+  });
+};
+
+const update_button_styles = () => {
+  // Ensure that the button style changes immediately on touch for mobile.
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(button => {
+    button.addEventListener('touchstart', () => {
+      button.classList.add('active');
+    });
+    button.addEventListener('touchend', () => {
+      button.classList.remove('active');
+    });
+  });
 };
 
 onMounted(() => {
   fetchGenres();
-  enableThumbMovement();
+  fix_range_thumb_behavior();
+  update_button_styles();
 });
 
 watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
@@ -206,14 +229,15 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 
 .filter-buttons {
   display: flex;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 2px;
+  margin-bottom: 5px;
 }
 
 .filter-dropdown {
   background-color: black;
   padding: 15px;
   border-radius: 5px;
+  margin-top: 5px;
 }
 
 .filter-section {
@@ -269,7 +293,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   top: 0;
   left: 0;
   margin: 0;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .range-slider input[type="range"]::-webkit-slider-thumb {
@@ -302,7 +326,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 button {
-  margin-right: 5px;
+  margin-right: 2px;
   margin-bottom: 10px;
   padding: 5px 10px;
   border: none;
@@ -326,6 +350,10 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.filter-reset {
+  background-color: black;
 }
 
 .page-table-container {
