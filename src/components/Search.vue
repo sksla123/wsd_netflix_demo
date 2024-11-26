@@ -210,11 +210,13 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 @media (max-width: 768px) {
-  .container {
-    width: 90%;
-  }
   .filter-dropdown {
     width: 70% !important;
+  }
+  .page-table-container {
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
   }
 }
 
@@ -246,13 +248,12 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 .filter-container {
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .filter-buttons {
   display: flex;
   gap: 2px;
-  margin-bottom: 5px;
 }
 
 .filter-dropdown {
