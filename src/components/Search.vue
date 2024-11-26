@@ -3,15 +3,15 @@
     <!-- 검색 바 컨테이너 -->
     <div class="container search-container">
       <div class="search-bar">
-        <input type="text" v-model="searchQuery" placeholder="영화 검색..." />
-        <i class="pi pi-search"></i>
+        <input type="text" v-model="searchQuery" placeholder="영화 검색..." @keyup.enter="performSearch" />
+        <i class="pi pi-search" @click="performSearch"></i>
       </div>
     </div>
 
     <!-- 필터 컨테이너 -->
     <div class="container filter-container">
       <div class="filter-buttons">
-        <button @click="toggleFilter" class="filter-toggle" :class="{ active: showFilter }">필터</button>
+        <button @click="toggleFilter" class="filter-toggle" :class="{ active: showFilter }" :disabled="isSearchMode">필터</button>
         <button @click="resetFilterAndClose" class="filter-reset">초기화</button>
       </div>
       <div v-if="showFilter" class="filter-dropdown">
@@ -61,7 +61,11 @@
 
     <!-- 페이지 테이블 컨테이너 -->
     <div class="container page-table-container" :class="{ 'pushed-down': showFilter }">
-      <PageTable :key="tableKey" :baseURL="movieUrl" />
+      <div v-if="isSearchMode && searchedMovies.length === 0" class="no-results">
+        검색 결과가 없습니다.
+      </div>
+      <PageTable v-else-if="!isSearchMode" :key="tableKey" :baseURL="movieUrl" />
+      <PageTable2 v-else :movies="searchedMovies" />
     </div>
   </div>
 </template>
@@ -69,9 +73,10 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
-import { getBaseMovieUrl, addExtraQuery2MovieUrl } from './common/api/url';
-import { getResponse } from './common/api/api';
+import { getBaseMovieUrl, addExtraQuery2MovieUrl, addPage2MovieUrl } from './common/api/url';
+import { getResponse, getMovieDatas } from './common/api/api';
 import PageTable from './common/view/PageTable.vue';
+import PageTable2 from './common/view/PageTable2.vue';
 
 const store = useStore();
 const searchQuery = ref('');
@@ -80,6 +85,8 @@ const selectedLanguage = ref('ko');
 const genres = ref([]);
 const showFilter = ref(false);
 const tableKey = ref(0);
+const isSearchMode = ref(false);
+const searchedMovies = ref([]);
 
 const star_start = ref(0);
 const star_end = ref(10);
@@ -96,15 +103,17 @@ const movieUrl = computed(() => {
 
   url = addExtraQuery2MovieUrl(url, `&vote_average.gte=${star_start.value}&vote_average.lte=${star_end.value}`);
 
-  console.log('Generated URL:', url); // URL 로깅
+  console.log('Generated URL:', url);
 
   return url;
 });
 
 const toggleFilter = () => {
-  showFilter.value = !showFilter.value;
-  if (showFilter.value) {
-    resetFilter();
+  if (!isSearchMode.value) {
+    showFilter.value = !showFilter.value;
+    if (showFilter.value) {
+      resetFilter();
+    }
   }
 };
 
@@ -118,6 +127,9 @@ const resetFilter = () => {
 const resetFilterAndClose = () => {
   resetFilter();
   showFilter.value = false;
+  isSearchMode.value = false;
+  searchQuery.value = '';
+  searchedMovies.value = [];
   refreshTable();
 };
 
@@ -214,6 +226,26 @@ const refreshTable = () => {
   tableKey.value += 1;
 };
 
+const performSearch = async () => {
+  const inputStr = searchQuery.value.trim();
+  if (inputStr) {
+    isSearchMode.value = true;
+    showFilter.value = false;
+
+    const baseUrl = getBaseMovieUrl(apiKey.value, "/search/movie", '&language=ko-KR');
+    const urlWithQuery = addExtraQuery2MovieUrl(baseUrl, `&query=${encodeURIComponent(inputStr)}`);
+    const finalUrl = addPage2MovieUrl(urlWithQuery, 1);
+
+    try {
+      const movies = await getMovieDatas(finalUrl);
+      searchedMovies.value = movies;
+    } catch (error) {
+      console.error('Error searching movies:', error);
+      searchedMovies.value = [];
+    }
+  }
+};
+
 onMounted(() => {
   fetchGenres();
   setupEventListeners();
@@ -260,6 +292,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   top: 50%;
   transform: translateY(-50%);
   color: red;
+  cursor: pointer;
 }
 
 @media (min-width: 769px) {
@@ -416,6 +449,12 @@ button:disabled {
 }
 
 .page-table-container.pushed-down {
+  margin-top: 20px;
+}
+
+.no-results {
+  text-align: center;
+  font-size: 18px;
   margin-top: 20px;
 }
 </style>
