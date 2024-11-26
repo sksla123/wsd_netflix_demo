@@ -1,7 +1,11 @@
-export function getBaseMovieUrl(api_key, end_point = "/movie/now_playing") {
+export function getBaseMovieUrl(api_key, end_point = "/movie/now_playing", language = '&language=ko-KR') {
     const baseUrl = "https://api.themoviedb.org/3";
-    const url = `${baseUrl}${end_point}?api_key=${api_key}&language=ko-KR`;
+    const url = `${baseUrl}${end_point}?api_key=${api_key}${language}`;
+    return url;
+}
 
+export function addExtraQuery2MovieUrl(baseUrl, extraQuery){
+    const url = `${baseUrl}${extraQuery}`;
     return url;
 }
 
