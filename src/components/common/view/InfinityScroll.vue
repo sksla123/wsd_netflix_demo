@@ -40,13 +40,14 @@ const initialHeight = ref(0);
 const lastScrollTop = ref(0);
 const init_flag = ref(true);
 const isButtonClicked = ref(false);
+const scrollContainerHeight = ref(0);
 
 const grid = computed(() => {
-  const availableWidth = containerWidth.value - (LAYOUT.spacing.padding * 2);
-  const columns = Math.max(1, Math.floor((availableWidth + LAYOUT.spacing.gap) / (LAYOUT.poster.width + LAYOUT.spacing.gap)));
-  const availableHeight = scrollContainer.value ? scrollContainer.value.clientHeight : 0;
-  const rows = Math.max(1, Math.floor(availableHeight / (LAYOUT.poster.height + LAYOUT.spacing.gap))) + 2;
-  return { columns, rows };
+    const availableWidth = containerWidth.value - (LAYOUT.spacing.padding * 2);
+    const columns = Math.max(1, Math.floor((availableWidth + LAYOUT.spacing.gap) / (LAYOUT.poster.width + LAYOUT.spacing.gap)));
+    const availableHeight = scrollContainerHeight.value;
+    const rows = Math.max(1, Math.floor(availableHeight / (LAYOUT.poster.height + LAYOUT.spacing.gap))) + 2;
+    return { columns, rows };
 });
 
 const visibleMovies = ref([]);
@@ -54,8 +55,8 @@ const visibleMovies = ref([]);
 const updateVisibleMovies = () => {
     const { rows, columns } = grid.value;
     const maxPosters = rows * columns;
-    console.log(maxPosters);
-  visibleMovies.value = movies.value.slice(0, maxPosters);
+    console.log('Max Posters:', maxPosters);
+    visibleMovies.value = movies.value.slice(0, maxPosters);
 };
 
 const containerStyle = computed(() => {
@@ -76,6 +77,7 @@ const posterStyle = computed(() => ({
 const updateContainerSize = () => {
     if (scrollContainer.value) {
         containerWidth.value = scrollContainer.value.clientWidth;
+        scrollContainerHeight.value = scrollContainer.value.clientHeight;
         const { rows, columns } = grid.value;
         containerHeight.value = (rows * LAYOUT.poster.height) + ((rows - 1) * LAYOUT.spacing.gap) + (LAYOUT.spacing.padding * 2);
     }
@@ -94,8 +96,8 @@ const handleScroll = async () => {
 
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
         await loadMoreMovies();
-        const { rows } = grid.value;
-        containerHeight.value += (2 * LAYOUT.poster.height) + (2 * LAYOUT.spacing.gap);
+        scrollContainerHeight.value += (2 * LAYOUT.poster.height) + (2 * LAYOUT.spacing.gap);
+        containerHeight.value = scrollContainerHeight.value;
     }
 
     lastScrollTop.value = currentScrollTop;
@@ -148,9 +150,9 @@ onMounted(async () => {
 });
 
 watch(() => grid.value, (newGrid, oldGrid) => {
-  console.log('Grid changed:', newGrid);
-  console.log('Old Grid:', oldGrid);
-  updateVisibleMovies();
+    console.log('Grid changed:', newGrid);
+    console.log('Old Grid:', oldGrid);
+    updateVisibleMovies();
 }, { immediate: true, deep: true });
 
 onUnmounted(() => {
