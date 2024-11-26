@@ -1,37 +1,20 @@
 <template>
   <div class="table-container" ref="tableContainer">
     <div class="white-container" :style="containerStyle">
-      <div v-for="movie in displayMovies" 
-           :key="movie.id" 
-           class="poster-container"
-           :style="posterStyle">
-        <PosterMobile 
-          :movie="movie"
-          class="poster-item"
-        />
+      <div v-for="movie in displayMovies" :key="movie.id" class="poster-container" :style="posterStyle">
+        <PosterMobile :movie="movie" class="poster-item" />
       </div>
     </div>
     <nav class="pagination">
-      <button 
-        @click="changePage(currentPage - 1)" 
-        :disabled="isFirstPage"
-        class="page-button"
-      >이전</button>
+      <button @click="changePage(currentPage - 1)" :disabled="isFirstPage" class="page-button">이전</button>
       <template v-for="(item, index) in displayedPageNumbers" :key="index">
-        <button 
-          v-if="typeof item === 'number'"
-          @click="changePage(item)"
-          :class="['page-number', { active: item === currentPage }]"
-        >
+        <button v-if="typeof item === 'number'" @click="changePage(item)"
+          :class="['page-number', { active: item === currentPage }]">
           {{ item }}
         </button>
         <span v-else class="ellipsis">{{ item }}</span>
       </template>
-      <button 
-        @click="changePage(currentPage + 1)" 
-        :disabled="isLastPage"
-        class="page-button"
-      >다음</button>
+      <button @click="changePage(currentPage + 1)" :disabled="isLastPage" class="page-button">다음</button>
     </nav>
   </div>
 </template>
@@ -81,10 +64,10 @@ const containerStyle = computed(() => {
   const { width, height } = LAYOUT.poster;
   const { gap, padding } = LAYOUT.spacing;
   const { columns, rows } = grid.value;
-  
+
   const contentWidth = (columns * width) + ((columns - 1) * gap);
   const contentHeight = (rows * height) + ((rows - 1) * gap);
-  
+
   return {
     width: `${contentWidth + padding * 2}px`,
     height: `${contentHeight + padding * 2}px`,
@@ -146,10 +129,10 @@ const updateLayout = () => {
 
 const changePage = async (newPage) => {
   if (newPage < 1 || newPage > totalPages.value) return;
-  
+
   currentPage.value = newPage;
   const neededMovies = (newPage + 1) * itemsPerPage.value;
-  
+
   if (movies.value.length < neededMovies) {
     await loadMoreMovies(Math.ceil(movies.value.length / itemsPerPage.value) + 1);
   }
@@ -159,7 +142,7 @@ const loadMoreMovies = async (page) => {
   try {
     const url = addPage2MovieUrl(props.baseURL, page);
     const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
-    
+
     newMovies.forEach(movie => {
       if (!moviesMap.value.has(movie.id)) {
         moviesMap.value.set(movie.id, movie);
@@ -167,9 +150,9 @@ const loadMoreMovies = async (page) => {
       }
     });
     totalResults.value = total;
-    
-    if (movies.value.length < totalResults.value && 
-        movies.value.length - (currentPage.value * itemsPerPage.value) < 100) {
+
+    if (movies.value.length < totalResults.value &&
+      movies.value.length - (currentPage.value * itemsPerPage.value) < 100) {
       await loadMoreMovies(page + 1);
     }
   } catch (error) {
@@ -182,10 +165,10 @@ onMounted(() => {
   const resizeObserver = new ResizeObserver(() => {
     requestAnimationFrame(updateLayout);
   });
-  
+
   resizeObserver.observe(tableContainer.value);
   loadMoreMovies(1);
-  
+
   onUnmounted(() => resizeObserver.disconnect());
 });
 </script>
@@ -209,7 +192,8 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  align-content: flex-start;
   gap: inherit;
 }
 
@@ -236,7 +220,8 @@ onMounted(() => {
   padding: 10px;
 }
 
-.page-button, .page-number {
+.page-button,
+.page-number {
   min-width: 40px;
   padding: 6px 12px;
   font-size: 0.9rem;
@@ -279,7 +264,8 @@ onMounted(() => {
     padding: 5px;
   }
 
-  .page-button, .page-number {
+  .page-button,
+  .page-number {
     min-width: 30px;
     padding: 4px 8px;
     font-size: 0.8rem;

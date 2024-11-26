@@ -75,6 +75,7 @@ const containerStyle = computed(() => ({
   justify-content: center;
   gap: 10px;
   margin-top: 10px;
+  margin-bottom: 5px;
 }
 
 .switch-button {
