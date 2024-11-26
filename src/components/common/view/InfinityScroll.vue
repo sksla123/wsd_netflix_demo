@@ -74,12 +74,20 @@ const posterStyle = computed(() => ({
     height: `${LAYOUT.poster.height}px`
 }));
 
+const updateContainerHeight = () => {
+    const { rows, columns } = grid.value;
+    const totalPosters = Math.min(rows * columns, movies.value.length);
+    const totalRows = Math.ceil(totalPosters / columns);
+    containerHeight.value = (totalRows * LAYOUT.poster.height) + 
+                            ((totalRows - 1) * LAYOUT.spacing.gap) + 
+                            (LAYOUT.spacing.padding * 2);
+};
+
 const updateContainerSize = () => {
     if (scrollContainer.value) {
         containerWidth.value = scrollContainer.value.clientWidth;
         scrollContainerHeight.value = scrollContainer.value.clientHeight;
-        const { rows, columns } = grid.value;
-        containerHeight.value = (rows * LAYOUT.poster.height) + ((rows - 1) * LAYOUT.spacing.gap) + (LAYOUT.spacing.padding * 2);
+        updateContainerHeight();
     }
 };
 
@@ -97,7 +105,7 @@ const handleScroll = async () => {
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
         await loadMoreMovies();
         scrollContainerHeight.value += (2 * LAYOUT.poster.height) + (2 * LAYOUT.spacing.gap);
-        containerHeight.value = scrollContainerHeight.value;
+        updateContainerHeight();
     }
 
     lastScrollTop.value = currentScrollTop;
@@ -119,6 +127,8 @@ const loadMoreMovies = async () => {
 
         if (movies.value.length >= totalResults.value) break;
     }
+
+    updateContainerHeight();
 };
 
 const scrollToTop = () => {
@@ -153,8 +163,8 @@ watch(() => grid.value, (newGrid, oldGrid) => {
     console.log('Grid changed:', newGrid);
     console.log('Old Grid:', oldGrid);
     updateVisibleMovies();
+    updateContainerHeight();
 }, { immediate: true, deep: true });
-
 onUnmounted(() => {
     window.removeEventListener('resize', updateContainerSize);
     window.removeEventListener('scroll', handleScroll);
@@ -181,6 +191,8 @@ onUnmounted(() => {
     flex-wrap: wrap;
     justify-content: center;
     align-content: flex-start;
+    clip-path: inset(0 0 0 0);
+    overflow: hidden;
 }
 
 .poster-wrapper {
