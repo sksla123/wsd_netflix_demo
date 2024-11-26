@@ -235,15 +235,6 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-  .container {
-    width: 90%;
-  }
-  .filter-dropdown {
-    width: 70% !important;
-  }
-}
-
 .search-container {
   margin-bottom: 20px;
 }
@@ -271,6 +262,22 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   color: red;
 }
 
+@media (min-width: 769px) {
+  .search-bar {
+    width: 30%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 90%;
+  }
+  .filter-dropdown {
+    width: 70% !important;
+  }
+}
+
 .filter-container {
   margin-bottom: 20px;
 }
@@ -278,14 +285,12 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 .filter-buttons {
   display: flex;
   gap: 2px;
-  margin-bottom: 5px;
 }
 
 .filter-dropdown {
   background-color: black;
   padding: 15px;
   border-radius: 5px;
-  margin-top: 5px;
   width: 50%;
   max-width: 70%;
 }
@@ -401,7 +406,8 @@ button:disabled {
   color: black;
   border-radius: 5px;
   font-weight: bold;
-}
+  margin-bottom: 0px;
+} 
 
 .page-table-container {
   height: 70vh;
