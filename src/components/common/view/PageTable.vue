@@ -52,14 +52,15 @@ const props = defineProps({
 });
 
 // State
-const moviesSet = ref(new Set());
+const moviesMap = ref(new Map());
+const movieOrder = ref([]);
 const currentPage = ref(1);
 const totalResults = ref(0);
 const tableContainer = ref(null);
 const grid = ref({ columns: 0, rows: 0 });
 
 // Computed
-const movies = computed(() => Array.from(moviesSet.value));
+const movies = computed(() => movieOrder.value.map(id => moviesMap.value.get(id)));
 const itemsPerPage = computed(() => grid.value.columns * grid.value.rows);
 const totalPages = computed(() => Math.ceil(totalResults.value / itemsPerPage.value) || 1);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -159,7 +160,12 @@ const loadMoreMovies = async (page) => {
     const url = addPage2MovieUrl(props.baseURL, page);
     const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
     
-    newMovies.forEach(movie => moviesSet.value.add(movie));
+    newMovies.forEach(movie => {
+      if (!moviesMap.value.has(movie.id)) {
+        moviesMap.value.set(movie.id, movie);
+        movieOrder.value.push(movie.id);
+      }
+    });
     totalResults.value = total;
     
     if (movies.value.length < totalResults.value && 

@@ -30,8 +30,7 @@ const props = defineProps({
 });
 
 const store = useStore();
-const movies = ref([]);
-const movieSet = ref(new Set());
+const moviesMap = ref(new Map());
 const totalResults = ref(0);
 const currentPage = ref(1);
 const scrollContainer = ref(null);
@@ -51,14 +50,13 @@ const grid = computed(() => {
     return { columns, rows };
 });
 
-const visibleMovies = ref([]);
+const movies = computed(() => Array.from(moviesMap.value.values()));
 
-const updateVisibleMovies = () => {
+const visibleMovies = computed(() => {
     const { rows, columns } = grid.value;
     const maxPosters = rows * columns;
-    console.log('Max Posters:', maxPosters);
-    visibleMovies.value = movies.value.slice(0, maxPosters);
-};
+    return movies.value.slice(0, maxPosters);
+});
 
 const containerStyle = computed(() => {
     const { columns } = grid.value;
@@ -113,26 +111,25 @@ const handleScroll = async () => {
 };
 
 const loadMoreMovies = async () => {
-    if (!init_flag.value && movies.value.length >= totalResults.value) return;
+    if (!init_flag.value && moviesMap.value.size >= totalResults.value) return;
 
     const { rows, columns } = grid.value;
     const requiredMovies = (rows * columns) + 20;
 
-    while (movies.value.length < requiredMovies) {
+    while (moviesMap.value.size < requiredMovies) {
         const url = addPage2MovieUrl(props.baseURL, currentPage.value);
         const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
 
         newMovies.forEach(movie => {
-            if (!movieSet.value.has(movie.id)) {
-                movieSet.value.add(movie.id);
-                movies.value.push(movie);
+            if (!moviesMap.value.has(movie.id)) {
+                moviesMap.value.set(movie.id, movie);
             }
         });
 
         totalResults.value = total;
         currentPage.value += 1;
 
-        if (movies.value.length >= totalResults.value) break;
+        if (moviesMap.value.size >= totalResults.value) break;
     }
 
     updateContainerHeight();
@@ -169,7 +166,6 @@ onMounted(async () => {
 watch(() => grid.value, (newGrid, oldGrid) => {
     console.log('Grid changed:', newGrid);
     console.log('Old Grid:', oldGrid);
-    updateVisibleMovies();
     updateContainerHeight();
 }, { immediate: true, deep: true });
 
