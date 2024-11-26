@@ -332,7 +332,10 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 
 @media (max-width: 768px) {
   .container {
-    width: 90%;
+    width: 100%;
+  }
+  .search-container {
+    width: 80%;
   }
   .filter-dropdown {
     width: 70% !important;
