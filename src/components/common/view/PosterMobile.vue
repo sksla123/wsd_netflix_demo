@@ -1,21 +1,25 @@
 <template>
   <div class="poster-container-mobile" 
-       @touchstart="startTouch" 
-       @touchend="endTouch"
+       v-touch:touchstart="startTouch"
+       v-touch:touchend="endTouch"
        @mouseenter="startHover"
-       @mouseleave="endHover">
-    <div class="poster-mobile" :class="{ 'touched': isTouched, 'hovered': isHovered }" @click="toggleWishlist">
+       @mouseleave="endHover"
+       @click="handleClick">
+    <div class="poster-mobile" :class="{ 'touched': isTouched && isMobile, 'hovered': isHovered && !isMobile }">
       <div class="poster-content-mobile">
         <div class="loading-overlay-mobile" v-if="!imageLoaded">
           <font-awesome-icon :icon="['fas', 'spinner']" spin class="spinner-mobile" />
         </div>
-        <img :src="posterUrl" @load="imageLoaded = true" @error="handleImageError" alt="Movie Poster" :class="{ 'loaded': imageLoaded }">
+        <img :src="posterUrl" @load="imageLoaded = true" @error="handleImageError" alt="Movie Poster"
+          :class="{ 'loaded': imageLoaded }">
       </div>
       <div class="wishlist-star-mobile">
         <font-awesome-icon :icon="['fas', 'star']" :class="{ 'wishlist': isInWishlist }" />
       </div>
     </div>
-    <h3 class="movie-title-mobile" :class="{ 'touched': isTouched, 'hovered': isHovered }">{{ title }}</h3>
+    <h3 class="movie-title-mobile" :class="{ 'touched': isTouched && isMobile, 'hovered': isHovered && !isMobile }">
+      {{ title }}
+    </h3>
   </div>
 </template>
 
@@ -43,8 +47,10 @@ const posterUrl = computed(() => {
 });
 
 const imageLoaded = ref(false);
+const isMobile = ref(false);
 const isTouched = ref(false);
 const isHovered = ref(false);
+let touchTimer = null;
 
 const isInWishlist = computed(() => {
   return store.getters.isInWishlist(userEmail.value, id);
@@ -64,25 +70,45 @@ const handleImageError = () => {
 };
 
 const startTouch = () => {
+  if (!isMobile.value) return;
   isTouched.value = true;
+  if (touchTimer) clearTimeout(touchTimer);
 };
 
 const endTouch = () => {
-  isTouched.value = false;
+  if (!isMobile.value) return;
+  if (touchTimer) clearTimeout(touchTimer);
+  touchTimer = setTimeout(() => {
+    isTouched.value = false;
+  }, 100);
+};
+
+const handleClick = async () => {
+  await toggleWishlist();
+  if (isMobile.value) {
+    startTouch();
+  }
 };
 
 const startHover = () => {
-  isHovered.value = true;
+  if (!isMobile.value) {
+    isHovered.value = true;
+  }
 };
 
 const endHover = () => {
-  isHovered.value = false;
+  if (!isMobile.value) {
+    isHovered.value = false;
+  }
 };
 
 onMounted(() => {
   if (userEmail.value) {
     store.dispatch('loadWishlist', userEmail.value);
   }
+  
+  // 모바일 환경 감지
+  isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 });
 </script>
 
@@ -105,12 +131,6 @@ onMounted(() => {
   height: 225px;
   transition: all 0.3s ease;
   cursor: pointer;
-}
-
-.poster-mobile.touched,
-.poster-mobile.hovered {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .poster-content-mobile {
@@ -193,8 +213,25 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-.movie-title-mobile.touched,
-.movie-title-mobile.hovered {
-  transform: translateY(5px);
+@media (hover: hover) and (pointer: fine) {
+  .poster-mobile:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .movie-title-mobile:hover {
+    transform: translateY(5px);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .poster-mobile.touched {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .movie-title-mobile.touched {
+    transform: translateY(5px);
+  }
 }
 </style>
