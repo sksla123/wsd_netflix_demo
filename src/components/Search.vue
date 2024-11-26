@@ -61,6 +61,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -158,11 +159,20 @@ const drag = (e) => {
   const rect = rangeSlider.getBoundingClientRect();
   const x = (e.clientX || e.touches[0].clientX) - rect.left;
   let percentage = Math.min(Math.max(x / rect.width, 0), 1);
+  let newValue = Math.round(percentage * 10);
   
   if (currentThumb === 'start') {
-    star_start.value = Math.min(Math.round(percentage * 10), star_end.value);
+    if (newValue < star_end.value) {
+      star_start.value = newValue;
+    } else {
+      star_start.value = star_end.value - 1;
+    }
   } else {
-    star_end.value = Math.max(Math.round(percentage * 10), star_start.value);
+    if (newValue > star_start.value) {
+      star_end.value = newValue;
+    } else {
+      star_end.value = star_start.value + 1;
+    }
   }
 };
 
