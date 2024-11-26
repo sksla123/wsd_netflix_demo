@@ -13,13 +13,22 @@
     </div>
     <nav class="pagination">
       <button 
-        @click="changePage(-1)" 
+        @click="changePage(currentPage - 1)" 
         :disabled="isFirstPage"
         class="page-button"
       >이전</button>
-      <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+      <template v-for="(item, index) in displayedPageNumbers" :key="index">
+        <button 
+          v-if="typeof item === 'number'"
+          @click="changePage(item)"
+          :class="['page-number', { active: item === currentPage }]"
+        >
+          {{ item }}
+        </button>
+        <span v-else class="ellipsis">{{ item }}</span>
+      </template>
       <button 
-        @click="changePage(1)" 
+        @click="changePage(currentPage + 1)" 
         :disabled="isLastPage"
         class="page-button"
       >다음</button>
@@ -43,13 +52,14 @@ const props = defineProps({
 });
 
 // State
-const movies = ref([]);
+const moviesSet = ref(new Set());
 const currentPage = ref(1);
 const totalResults = ref(0);
 const tableContainer = ref(null);
 const grid = ref({ columns: 0, rows: 0 });
 
 // Computed
+const movies = computed(() => Array.from(moviesSet.value));
 const itemsPerPage = computed(() => grid.value.columns * grid.value.rows);
 const totalPages = computed(() => Math.ceil(totalResults.value / itemsPerPage.value) || 1);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -82,6 +92,39 @@ const containerStyle = computed(() => {
   };
 });
 
+const displayedPageNumbers = computed(() => {
+  const current = currentPage.value;
+  const total = totalPages.value;
+  const result = [];
+
+  if (current <= 2) {
+    // 현재 1~2 페이지인 경우
+    for (let i = 1; i <= Math.min(3, total); i++) {
+      result.push(i);
+    }
+    if (total > 3) {
+      result.push('...');
+    }
+  } else if (current >= total - 1) {
+    // 현재 마지막 전 ~ 마지막 페이지인 경우
+    if (total > 3) {
+      result.push('...');
+    }
+    for (let i = Math.max(1, total - 2); i <= total; i++) {
+      result.push(i);
+    }
+  } else {
+    // 그 외 경우
+    result.push('...');
+    for (let i = current - 1; i <= current + 1; i++) {
+      result.push(i);
+    }
+    result.push('...');
+  }
+
+  return result;
+});
+
 // Methods
 const updateLayout = () => {
   if (!tableContainer.value) return;
@@ -100,8 +143,7 @@ const updateLayout = () => {
   };
 };
 
-const changePage = async (delta) => {
-  const newPage = currentPage.value + delta;
+const changePage = async (newPage) => {
   if (newPage < 1 || newPage > totalPages.value) return;
   
   currentPage.value = newPage;
@@ -117,7 +159,7 @@ const loadMoreMovies = async (page) => {
     const url = addPage2MovieUrl(props.baseURL, page);
     const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
     
-    movies.value = [...movies.value, ...newMovies];
+    newMovies.forEach(movie => moviesSet.value.add(movie));
     totalResults.value = total;
     
     if (movies.value.length < totalResults.value && 
@@ -183,13 +225,13 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   margin-top: 10px;
   padding: 10px;
 }
 
-.page-button {
-  min-width: 60px;
+.page-button, .page-number {
+  min-width: 40px;
   padding: 6px 12px;
   font-size: 0.9rem;
   color: white;
@@ -200,7 +242,8 @@ onMounted(() => {
   transition: 0.3s ease;
 }
 
-.page-button:hover:not(:disabled) {
+.page-button:hover:not(:disabled),
+.page-number:hover:not(.active) {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -209,11 +252,14 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-.page-info {
-  min-width: 80px;
+.page-number.active {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.ellipsis {
   color: white;
-  font-size: 1rem;
-  text-align: center;
+  font-size: 0.9rem;
+  padding: 6px 12px;
 }
 
 @media (max-width: 768px) {
@@ -222,20 +268,20 @@ onMounted(() => {
   }
 
   .pagination {
-    gap: 8px;
+    gap: 5px;
     margin-top: 5px;
     padding: 5px;
   }
 
-  .page-button {
-    min-width: 50px;
+  .page-button, .page-number {
+    min-width: 30px;
     padding: 4px 8px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
-  .page-info {
-    min-width: 60px;
-    font-size: 0.9rem;
+  .ellipsis {
+    padding: 4px 8px;
+    font-size: 0.8rem;
   }
 }
 </style>

@@ -49,7 +49,7 @@ const toggleWishlist = async () => {
   if (isInWishlist.value) {
     await store.dispatch('removeFromWishlist', { userEmail: userEmail.value, movieId: id });
   } else {
-    await store.dispatch('addToWishlist', { userEmail: userEmail.value, movieId: id, genreIds });
+    await store.dispatch('addToWishlist', { userEmail: userEmail.value, movieId: id, genreIds: props.movie });
   }
 };
 

@@ -31,6 +31,7 @@ const props = defineProps({
 
 const store = useStore();
 const movies = ref([]);
+const movieSet = ref(new Set());
 const totalResults = ref(0);
 const currentPage = ref(1);
 const scrollContainer = ref(null);
@@ -121,7 +122,13 @@ const loadMoreMovies = async () => {
         const url = addPage2MovieUrl(props.baseURL, currentPage.value);
         const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
 
-        movies.value.push(...newMovies);
+        newMovies.forEach(movie => {
+            if (!movieSet.value.has(movie.id)) {
+                movieSet.value.add(movie.id);
+                movies.value.push(movie);
+            }
+        });
+
         totalResults.value = total;
         currentPage.value += 1;
 
@@ -165,6 +172,7 @@ watch(() => grid.value, (newGrid, oldGrid) => {
     updateVisibleMovies();
     updateContainerHeight();
 }, { immediate: true, deep: true });
+
 onUnmounted(() => {
     window.removeEventListener('resize', updateContainerSize);
     window.removeEventListener('scroll', handleScroll);
