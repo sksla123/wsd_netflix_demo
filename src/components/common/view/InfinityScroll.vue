@@ -164,8 +164,8 @@ onMounted(async () => {
 });
 
 watch(() => grid.value, (newGrid, oldGrid) => {
-    console.log('Grid changed:', newGrid);
-    console.log('Old Grid:', oldGrid);
+    // console.log('Grid changed:', newGrid);
+    // console.log('Old Grid:', oldGrid);
     updateContainerHeight();
 }, { immediate: true, deep: true });
 

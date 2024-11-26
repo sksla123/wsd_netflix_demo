@@ -21,7 +21,7 @@ export class URLService {
     }
     try {
       const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?api_key=${this.apiKey}&language=ko-KR`);
-      console.log(response.data.results[0]);
+      // console.log(response.data.results[0]);
       return response.data.results[0];
     } catch (error) {
       console.error('Error fetching featured movie:', error);

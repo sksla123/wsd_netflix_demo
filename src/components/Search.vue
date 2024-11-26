@@ -74,7 +74,7 @@ const movieUrl = computed(() => {
 
   url = addExtraQuery2MovieUrl(url, `&vote_average.gte=${star_start.value}&vote_average.lte=${star_end.value}`);
 
-  console.log('Generated URL:', url);
+  // console.log('Generated URL:', url);
 
   return url;
 });
