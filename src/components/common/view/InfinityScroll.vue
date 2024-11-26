@@ -1,19 +1,20 @@
 <template>
     <div class="infinity-scroll-container" ref="scrollContainer">
         <div class="white-container" :style="{ ...containerStyle, height: `${containerHeight}px` }">
-            <div v-for="movie in movies" :key="movie.id" class="poster-wrapper" :style="posterStyle">
+            <div v-for="movie in visibleMovies" :key="movie.id" class="poster-wrapper" :style="posterStyle">
                 <PosterMobile :movie="movie" class="poster-item" />
             </div>
         </div>
 
-        <button class="scroll-top-button" @click="scrollToTop">
+        <button class="scroll-top-button" @click="scrollToTop" @mouseenter="startButtonAnimation"
+            @mouseleave="endButtonAnimation" :class="{ 'button-clicked': isButtonClicked }">
             <i class="pi pi-angle-double-up"></i>
         </button>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import { getMovieAndMetaDatas } from '../api/api';
 import { addPage2MovieUrl } from '../api/url';
@@ -34,16 +35,28 @@ const totalResults = ref(0);
 const currentPage = ref(1);
 const scrollContainer = ref(null);
 const containerWidth = ref(0);
-const containerHeight = ref(0); // 현재 white-container의 높이
-const initialHeight = ref(0); // 최초 white-container의 높이
-const lastScrollTop = ref(0); // 마지막 스크롤 위치 저장
+const containerHeight = ref(0);
+const initialHeight = ref(0);
+const lastScrollTop = ref(0);
 const init_flag = ref(true);
+const isButtonClicked = ref(false);
 
 const grid = computed(() => {
-    const availableWidth = containerWidth.value - (LAYOUT.spacing.padding * 2);
-    const columns = Math.max(1, Math.floor((availableWidth + LAYOUT.spacing.gap) / (LAYOUT.poster.width + LAYOUT.spacing.gap)));
-    return { columns };
+  const availableWidth = containerWidth.value - (LAYOUT.spacing.padding * 2);
+  const columns = Math.max(1, Math.floor((availableWidth + LAYOUT.spacing.gap) / (LAYOUT.poster.width + LAYOUT.spacing.gap)));
+  const availableHeight = scrollContainer.value ? scrollContainer.value.clientHeight : 0;
+  const rows = Math.max(1, Math.floor(availableHeight / (LAYOUT.poster.height + LAYOUT.spacing.gap))) + 2;
+  return { columns, rows };
 });
+
+const visibleMovies = ref([]);
+
+const updateVisibleMovies = () => {
+    const { rows, columns } = grid.value;
+    const maxPosters = rows * columns;
+    console.log(maxPosters);
+  visibleMovies.value = movies.value.slice(0, maxPosters);
+};
 
 const containerStyle = computed(() => {
     const { columns } = grid.value;
@@ -60,83 +73,89 @@ const posterStyle = computed(() => ({
     height: `${LAYOUT.poster.height}px`
 }));
 
-// white-container의 높이를 업데이트하는 함수
 const updateContainerSize = () => {
     if (scrollContainer.value) {
         containerWidth.value = scrollContainer.value.clientWidth;
-        const newHeight = scrollContainer.value.clientHeight; // 현재 infinity-scroll-container의 높이
-        initialHeight.value = newHeight; // 최초 높이를 업데이트
-        if (containerHeight.value === 0) {
-            containerHeight.value = newHeight; // 초기 설정
-        }
+        const { rows, columns } = grid.value;
+        containerHeight.value = (rows * LAYOUT.poster.height) + ((rows - 1) * LAYOUT.spacing.gap) + (LAYOUT.spacing.padding * 2);
     }
 };
 
-// 스크롤 이벤트가 발생할 때 white-container의 height를 조정
-const handleScroll = () => {
+const handleScroll = async () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 5) {
+        await loadMoreMovies();
+    }
+
     const container = scrollContainer.value;
     if (!container) return;
 
-    const currentScrollTop = container.scrollTop; // 현재 스크롤 위치
-
-    if (currentScrollTop > lastScrollTop.value) {
-        // 아래로 스크롤 -> height 증가
-        containerHeight.value += currentScrollTop - lastScrollTop.value;
-    } else if (currentScrollTop < lastScrollTop.value) {
-        // 위로 스크롤 -> height 감소
-        containerHeight.value -= lastScrollTop.value - currentScrollTop;
-        if (containerHeight.value < initialHeight.value) {
-            containerHeight.value = initialHeight.value; // 최초 높이 이하로 줄어들지 않도록 설정
-        }
-    }
-
-    lastScrollTop.value = currentScrollTop; // 마지막 스크롤 위치 업데이트
+    const currentScrollTop = container.scrollTop;
 
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-        loadMoreMovies();
+        await loadMoreMovies();
+        const { rows } = grid.value;
+        containerHeight.value += (2 * LAYOUT.poster.height) + (2 * LAYOUT.spacing.gap);
     }
+
+    lastScrollTop.value = currentScrollTop;
 };
 
 const loadMoreMovies = async () => {
     if (!init_flag.value && movies.value.length >= totalResults.value) return;
 
-    const url = addPage2MovieUrl(props.baseURL, currentPage.value);
-    const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
+    const { rows, columns } = grid.value;
+    const requiredMovies = (rows * columns) + 20;
 
-    movies.value.push(...newMovies);
-    totalResults.value = total;
-    currentPage.value += 1;
+    while (movies.value.length < requiredMovies) {
+        const url = addPage2MovieUrl(props.baseURL, currentPage.value);
+        const { movies: newMovies, totalResults: total } = await getMovieAndMetaDatas(url);
+
+        movies.value.push(...newMovies);
+        totalResults.value = total;
+        currentPage.value += 1;
+
+        if (movies.value.length >= totalResults.value) break;
+    }
 };
 
 const scrollToTop = () => {
     if (scrollContainer.value) {
         scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    isButtonClicked.value = true;
+    setTimeout(() => {
+        isButtonClicked.value = false;
+    }, 300);
+};
+
+const startButtonAnimation = () => {
+    // 버튼 애니메이션 시작 로직
+};
+
+const endButtonAnimation = () => {
+    // 버튼 애니메이션 종료 로직
 };
 
 onMounted(async () => {
-    const initialData = await getMovieAndMetaDatas(props.baseURL);
-    movies.value = initialData.movies;
-    totalResults.value = initialData.totalResults;
-
-    for (let i = 0; i < 9; i++) {
-        await loadMoreMovies();
-    }
-
+    await loadMoreMovies();
     init_flag.value = false;
 
-    // 초기 크기 업데이트 및 이벤트 리스너 등록
     updateContainerSize();
-
     scrollContainer.value.addEventListener('scroll', handleScroll);
-
-    window.addEventListener('resize', updateContainerSize); // 창 크기 변경 시 호출
+    window.addEventListener('resize', updateContainerSize);
+    window.addEventListener('scroll', handleScroll);
 });
 
-onUnmounted(() => {
-    // 이벤트 리스너 제거
-    window.removeEventListener('resize', updateContainerSize);
+watch(() => grid.value, (newGrid, oldGrid) => {
+  console.log('Grid changed:', newGrid);
+  console.log('Old Grid:', oldGrid);
+  updateVisibleMovies();
+}, { immediate: true, deep: true });
 
+onUnmounted(() => {
+    window.removeEventListener('resize', updateContainerSize);
+    window.removeEventListener('scroll', handleScroll);
     if (scrollContainer.value) {
         scrollContainer.value.removeEventListener('scroll', handleScroll);
     }
@@ -148,7 +167,6 @@ onUnmounted(() => {
     position: relative;
     overflow-y: auto;
     height: calc(100vh - 40px);
-    /* infinity-scroll-container의 높이 */
     display: flex;
     justify-content: center;
 }
@@ -183,9 +201,32 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.scroll-top-button:hover {
+    transform: scale(1.1);
+}
+
+.scroll-top-button.button-clicked {
+    animation: clickAnimation 0.3s ease;
 }
 
 .scroll-top-button i {
     font-size: 1.5rem;
+}
+
+@keyframes clickAnimation {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 </style>
