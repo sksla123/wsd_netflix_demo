@@ -1,7 +1,7 @@
 <template>
   <div class="login-container" :style="{ height: `${availableHeight}px` }">
     <BackgroundAnimation />
-    <div class="login-box-wrapper">
+    <div class="login-box-wrapper animate-section">
       <img src="/netflix.png" alt="Netflix" class="netflix-logo">
       <div class="login-box">
         <Transition name="rotate" mode="out-in">
@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { handleSignup as signupHandler } from './signin/join';
@@ -149,7 +149,6 @@ const handleLogin = async () => {
   }
 };
 
-
 // 비밀번호 재설정 처리
 const sendResetCode = () => {
   showToast.value = false;
@@ -205,6 +204,15 @@ const showTerms = () => {
   showTermsModal.value = true;
 };
 
+const animateSections = () => {
+  const sections = document.querySelectorAll('.animate-section');
+  sections.forEach((section, index) => {
+    setTimeout(() => {
+      section.classList.add('animate');
+    }, index * 200);
+  });
+};
+
 onMounted(async () => {
   const savedUserInfo = localStorage.getItem('LocalUserInfo');
   if (savedUserInfo) {
@@ -221,6 +229,9 @@ onMounted(async () => {
   } catch (error) {
     console.error('이용약관을 불러오는 데 실패했습니다:', error);
   }
+
+  await nextTick();
+  animateSections();
 });
 </script>
 
@@ -363,6 +374,17 @@ a {
 .terms-text {
   white-space: pre-wrap;
   margin-bottom: 1rem;
+}
+
+.animate-section {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.animate-section.animate {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* 반응형 디자인 */
