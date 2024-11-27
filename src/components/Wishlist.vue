@@ -1,6 +1,6 @@
 <template>
   <div class="wishlist-container" :style="containerStyle">
-    <div class="content-wrapper">
+    <div class="content-wrapper animate-section">
       <div v-if="loading" class="loading-message">Loading...</div>
       <template v-else>
         <InfinityScroll2 
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
+import { ref, onMounted, computed, onUnmounted, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import InfinityScroll2 from './common/view/PageTable2.vue';
 
@@ -54,12 +54,23 @@ const loadWishlist = async () => {
   const userWishlist = store.state.wishlist[userEmail] || {};
   movies.value = transformWishlistToArray(userWishlist);
   loading.value = false;
+  await nextTick();
+  animateSections();
 };
 
 const handleStorageChange = (event) => {
   if (event.key === 'UserWishlist') {
     store.dispatch('loadWishlist', store.state.userEmail);
   }
+};
+
+const animateSections = () => {
+  const sections = document.querySelectorAll('.animate-section');
+  sections.forEach((section, index) => {
+    setTimeout(() => {
+      section.classList.add('animate');
+    }, index * 200);
+  });
 };
 
 onMounted(() => {
@@ -102,6 +113,17 @@ watch(() => store.state.wishlist, loadWishlist, { deep: true });
   font-size: 18px;
   color: #fff;
   margin-top: 50px;
+}
+
+.animate-section {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.animate-section.animate {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
