@@ -1,21 +1,21 @@
 <template>
   <div class="home-container" :class="{ 'mobile': isMobile }">
     <div class="home" :style="mobileStyle">
-      <div class="banner-container">
+      <div class="banner-container animate-section">
         <MovieBanner v-if="popularMovies.length > 0" :movie="randomPopularMovie" />
       </div>
 
-      <section class="movie-section">
+      <section class="movie-section animate-section">
         <h2>인기 영화</h2>
         <HorizontalSlide :movies="popularMovies" />
       </section>
 
-      <section class="movie-section">
+      <section class="movie-section animate-section">
         <h2>현재 상영 중인 영화</h2>
         <HorizontalSlide :movies="nowPlayingMovies" />
       </section>
 
-      <section class="movie-section">
+      <section class="movie-section animate-section">
         <h2>오늘의 추천 영화</h2>
         <h3>{{ subTitle }}: {{ selectedGenre }}</h3>
         <HorizontalSlide :movies="recommendedMovies" />
@@ -146,6 +146,15 @@ export default {
       return await getMovieDatas(url);
     };
 
+    const animateSections = () => {
+      const sections = document.querySelectorAll('.animate-section');
+      sections.forEach((section, index) => {
+        setTimeout(() => {
+          section.classList.add('animate');
+        }, index * 200); // 각 섹션마다 200ms 간격으로 애니메이션 시작
+      });
+    };
+
     onMounted(async () => {
       popularMovies.value = await fetchMovies('/movie/popular');
       nowPlayingMovies.value = await fetchMovies('/movie/now_playing');
@@ -156,6 +165,9 @@ export default {
 
       const recommendedGenreId = selectRecommendedGenre();
       recommendedMovies.value = await fetchRecommendedMovies(recommendedGenreId);
+
+      // 모든 데이터가 로드된 후 애니메이션 시작
+      animateSections();
     });
 
     return {
@@ -212,6 +224,17 @@ h3 {
   font-size: 24px;
   margin-bottom: 20px;
   color: #ccc;
+}
+
+.animate-section {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.animate-section.animate {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (max-width: 1024px) {
