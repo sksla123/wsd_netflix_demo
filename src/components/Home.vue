@@ -65,7 +65,7 @@ export default {
       if (popularMovies.value.length > 0) {
         const randomIndex = Math.floor(Math.random() * popularMovies.value.length);
 
-        if (popularMovies[randomIndex].id == 179387) {
+        if (popularMovies.value[randomIndex].id == 179387) {
           randomIndex = 0;
         }
         
