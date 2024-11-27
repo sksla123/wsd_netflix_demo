@@ -13,101 +13,161 @@
       <h2>현재 상영 중인 영화</h2>
       <HorizontalSlide :movies="nowPlayingMovies" />
     </section>
+
+    <section class="movie-section">
+      <h2>오늘의 추천 영화</h2>
+      <h3>{{ subTitle }}: {{ selectedGenre }}</h3>
+      <HorizontalSlide :movies="recommendedMovies" />
+    </section>
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import HorizontalSlide from './common/view/HorizontalSlide.vue';
 import MovieBanner from './common/view/MovieBanner.vue';
-import { getBaseMovieUrl, getMovieUrl } from './common/api/url.js';
+import { getBaseMovieUrl, getMovieUrl, addExtraQuery2MovieUrl } from './common/api/url.js';
 import { getMovieDatas, getResponse } from './common/api/api.js';
 
-const props = defineProps({
-  availableWidth: {
-    type: Number,
-    required: true
-  }
-});
-
-const isMobile = computed(() => props.availableWidth <= 768);
-
-const mobileStyle = computed(() => {
-  if (isMobile.value) {
-    return { maxWidth: `${props.availableWidth}px` };
-  }
-  return {};
-});
-
-const store = useStore();
-const popularMovies = ref([]);
-const nowPlayingMovies = ref([]);
-
-const randomPopularMovie = computed(() => {
-  if (popularMovies.value.length > 0) {
-    const randomIndex = Math.floor(Math.random() * popularMovies.value.length);
-    return popularMovies.value[randomIndex];
-  }
-  return null;
-});
-
-const fetchMovies = async (endpoint) => {
-  const api_key = store.state.userAPIKey;
-  const url = getMovieUrl(api_key, endpoint);
-  return await getMovieDatas(url);
-};
-
-const fetchGenres = async () => {
-  const api_key = store.state.userAPIKey;
-  const url = getBaseMovieUrl(api_key, "/genre/movie/list");
-  const response = await getResponse(url);
-  return response.data.genres;
-};
-
-const updateUserGenrePreference = (genres) => {
-  const userEmail = store.state.userEmail;
-  let userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
-
-  if (!userGenrePreference[userEmail]) {
-    userGenrePreference[userEmail] = {};
-  }
-
-  genres.forEach(genre => {
-    if (!userGenrePreference[userEmail][genre.id]) {
-      userGenrePreference[userEmail][genre.id] = [genre.name, 0];
+export default {
+  name: 'Home',
+  components: {
+    HorizontalSlide,
+    MovieBanner
+  },
+  props: {
+    availableWidth: {
+      type: Number,
+      required: true
     }
-  });
+  },
+  setup(props) {
+    const store = useStore();
+    const popularMovies = ref([]);
+    const nowPlayingMovies = ref([]);
+    const recommendedMovies = ref([]);
+    const subTitle = ref('');
+    const selectedGenre = ref('');
 
-  localStorage.setItem('UserGenrePreference', JSON.stringify(userGenrePreference));
-};
+    const isMobile = computed(() => props.availableWidth <= 768);
 
-const updatePreferenceCounts = () => {
-  const userEmail = store.state.userEmail;
-  const userWishlist = JSON.parse(localStorage.getItem('UserWishlist')) || {};
-  let userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
+    const mobileStyle = computed(() => {
+      if (isMobile.value) {
+        return { maxWidth: `${props.availableWidth}px` };
+      }
+      return {};
+    });
 
-  if (userWishlist[userEmail]) {
-    Object.values(userWishlist[userEmail]).forEach(movie => {
-      movie.genreIds.forEach(genreId => {
-        if (userGenrePreference[userEmail][genreId]) {
-          userGenrePreference[userEmail][genreId][1]++;
+    const randomPopularMovie = computed(() => {
+      if (popularMovies.value.length > 0) {
+        const randomIndex = Math.floor(Math.random() * popularMovies.value.length);
+        return popularMovies.value[randomIndex];
+      }
+      return null;
+    });
+
+    const fetchMovies = async (endpoint) => {
+      const api_key = store.state.userAPIKey;
+      const url = getMovieUrl(api_key, endpoint);
+      return await getMovieDatas(url);
+    };
+
+    const fetchGenres = async () => {
+      const api_key = store.state.userAPIKey;
+      const url = getBaseMovieUrl(api_key, "/genre/movie/list");
+      const response = await getResponse(url);
+      return response.data.genres;
+    };
+
+    const updateUserGenrePreference = (genres) => {
+      const userEmail = store.state.userEmail;
+      let userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
+
+      if (!userGenrePreference[userEmail]) {
+        userGenrePreference[userEmail] = {};
+      }
+
+      genres.forEach(genre => {
+        if (!userGenrePreference[userEmail][genre.id]) {
+          userGenrePreference[userEmail][genre.id] = [genre.name, 0];
         }
       });
+
+      localStorage.setItem('UserGenrePreference', JSON.stringify(userGenrePreference));
+    };
+
+    const updatePreferenceCounts = () => {
+      const userEmail = store.state.userEmail;
+      const userWishlist = JSON.parse(localStorage.getItem('UserWishlist')) || {};
+      let userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
+
+      if (userWishlist[userEmail]) {
+        Object.values(userWishlist[userEmail]).forEach(movie => {
+          movie.genreIds.forEach(genreId => {
+            if (userGenrePreference[userEmail][genreId]) {
+              userGenrePreference[userEmail][genreId][1]++;
+            }
+          });
+        });
+      }
+
+      localStorage.setItem('UserGenrePreference', JSON.stringify(userGenrePreference));
+    };
+
+    const selectRecommendedGenre = () => {
+      const userEmail = store.state.userEmail;
+      const userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
+      const userPreference = userGenrePreference[userEmail] || {};
+
+      const allZero = Object.values(userPreference).every(([, count]) => count === 0);
+
+      if (allZero) {
+        subTitle.value = '웹사이트 추천';
+        const randomGenreId = Object.keys(userPreference)[Math.floor(Math.random() * Object.keys(userPreference).length)];
+        selectedGenre.value = userPreference[randomGenreId][0];
+        return randomGenreId;
+      } else {
+        subTitle.value = '당신이 좋아하는 장르';
+        const maxCount = Math.max(...Object.values(userPreference).map(([, count]) => count));
+        const topGenres = Object.entries(userPreference).filter(([, [, count]]) => count === maxCount);
+        const [selectedGenreId, [genreName]] = topGenres[Math.floor(Math.random() * topGenres.length)];
+        selectedGenre.value = genreName;
+        return selectedGenreId;
+      }
+    };
+
+    const fetchRecommendedMovies = async (genreId) => {
+      const api_key = store.state.userAPIKey;
+      const baseUrl = getBaseMovieUrl(api_key, "/discover/movie");
+      const url = addExtraQuery2MovieUrl(baseUrl, `&with_genres=${genreId}`);
+      return await getMovieDatas(url);
+    };
+
+    onMounted(async () => {
+      popularMovies.value = await fetchMovies('/movie/popular');
+      nowPlayingMovies.value = await fetchMovies('/movie/now_playing');
+
+      const genres = await fetchGenres();
+      updateUserGenrePreference(genres);
+      updatePreferenceCounts();
+
+      const recommendedGenreId = selectRecommendedGenre();
+      recommendedMovies.value = await fetchRecommendedMovies(recommendedGenreId);
     });
+
+    return {
+      isMobile,
+      mobileStyle,
+      popularMovies,
+      nowPlayingMovies,
+      recommendedMovies,
+      randomPopularMovie,
+      subTitle,
+      selectedGenre
+    };
   }
-
-  localStorage.setItem('UserGenrePreference', JSON.stringify(userGenrePreference));
 };
-
-onMounted(async () => {
-  popularMovies.value = await fetchMovies('/movie/popular');
-  nowPlayingMovies.value = await fetchMovies('/movie/now_playing');
-
-  const genres = await fetchGenres();
-  updateUserGenrePreference(genres);
-  updatePreferenceCounts();
-});
 </script>
 
 <style scoped>
@@ -134,14 +194,24 @@ onMounted(async () => {
 
 h2 {
   font-size: 36px;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   color: #fff;
   font-weight: bold;
+}
+
+h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #ccc;
 }
 
 @media (max-width: 1024px) {
   h2 {
     font-size: 32px;
+  }
+
+  h3 {
+    font-size: 22px;
   }
 }
 
@@ -152,7 +222,12 @@ h2 {
 
   h2 {
     font-size: 28px;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
   }
 }
 </style>
