@@ -395,11 +395,11 @@ watch(isMobile, (newValue) => {
 }
 
 .nav-icon {
-  transition: color 3s ease;
+  transition: color 1s ease;
 }
 
 .icon-hovered {
-  animation: fillColor 4s ease forwards;
+  animation: fillColor 2s ease forwards;
 }
 
 @keyframes fillColor {
