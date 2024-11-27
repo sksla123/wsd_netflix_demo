@@ -1,7 +1,7 @@
 <template>
   <div class="home" :class="{ 'mobile': isMobile }" :style="mobileStyle">
     <div class="banner-container">
-      <MovieBanner v-if="popularMovies.length > 0" :movie="popularMovies[0]" />
+      <MovieBanner v-if="popularMovies.length > 0" :movie="randomPopularMovie" />
     </div>
 
     <section class="movie-section">
@@ -21,8 +21,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import HorizontalSlide from './common/view/HorizontalSlide.vue';
 import MovieBanner from './common/view/MovieBanner.vue';
-import { getMovieUrl } from './common/api/url.js';
-import { getMovieDatas } from './common/api/api.js';
+import { getBaseMovieUrl, getMovieUrl } from './common/api/url.js';
+import { getMovieDatas, getResponse } from './common/api/api.js';
 
 const props = defineProps({
   availableWidth: {
@@ -44,15 +44,69 @@ const store = useStore();
 const popularMovies = ref([]);
 const nowPlayingMovies = ref([]);
 
+const randomPopularMovie = computed(() => {
+  if (popularMovies.value.length > 0) {
+    const randomIndex = Math.floor(Math.random() * popularMovies.value.length);
+    return popularMovies.value[randomIndex];
+  }
+  return null;
+});
+
 const fetchMovies = async (endpoint) => {
   const api_key = store.state.userAPIKey;
   const url = getMovieUrl(api_key, endpoint);
   return await getMovieDatas(url);
 };
 
+const fetchGenres = async () => {
+  const api_key = store.state.userAPIKey;
+  const url = getBaseMovieUrl(api_key, "/genre/movie/list");
+  const response = await getResponse(url);
+  return response.data.genres;
+};
+
+const updateUserGenrePreference = (genres) => {
+  const userEmail = store.state.userEmail;
+  let userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
+
+  if (!userGenrePreference[userEmail]) {
+    userGenrePreference[userEmail] = {};
+  }
+
+  genres.forEach(genre => {
+    if (!userGenrePreference[userEmail][genre.id]) {
+      userGenrePreference[userEmail][genre.id] = [genre.name, 0];
+    }
+  });
+
+  localStorage.setItem('UserGenrePreference', JSON.stringify(userGenrePreference));
+};
+
+const updatePreferenceCounts = () => {
+  const userEmail = store.state.userEmail;
+  const userWishlist = JSON.parse(localStorage.getItem('UserWishlist')) || {};
+  let userGenrePreference = JSON.parse(localStorage.getItem('UserGenrePreference')) || {};
+
+  if (userWishlist[userEmail]) {
+    Object.values(userWishlist[userEmail]).forEach(movie => {
+      movie.genreIds.forEach(genreId => {
+        if (userGenrePreference[userEmail][genreId]) {
+          userGenrePreference[userEmail][genreId][1]++;
+        }
+      });
+    });
+  }
+
+  localStorage.setItem('UserGenrePreference', JSON.stringify(userGenrePreference));
+};
+
 onMounted(async () => {
   popularMovies.value = await fetchMovies('/movie/popular');
   nowPlayingMovies.value = await fetchMovies('/movie/now_playing');
+
+  const genres = await fetchGenres();
+  updateUserGenrePreference(genres);
+  updatePreferenceCounts();
 });
 </script>
 
