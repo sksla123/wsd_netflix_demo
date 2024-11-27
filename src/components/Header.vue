@@ -96,20 +96,20 @@ watch(isMobile, (newValue) => {
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
       </RouterLink>
       <nav class="desktop-nav">
-        <RouterLink to="/">
-          <font-awesome-icon :icon="['fas', 'house']" class="nav-icon" />
+        <RouterLink to="/" class="nav-link">
+          <font-awesome-icon :icon="['fas', 'house']" class="nav-icon home-icon" />
           홈
         </RouterLink>
-        <RouterLink to="/popular">
-          <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon" />
+        <RouterLink to="/popular" class="nav-link">
+          <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon popular-icon" />
           지금 뜨는 콘텐츠
         </RouterLink>
-        <RouterLink to="/search">
-          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon" />
+        <RouterLink to="/search" class="nav-link">
+          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon search-icon" />
           찾아보기
         </RouterLink>
-        <RouterLink to="/wishlist">
-          <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon" />
+        <RouterLink to="/wishlist" class="nav-link">
+          <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon wishlist-icon" />
           내가 찜한 리스트
         </RouterLink>
       </nav>
