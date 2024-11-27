@@ -20,7 +20,7 @@ const showMenu = ref(false);
 const showProfile = ref(false);
 const isMobile = ref(window.innerWidth <= 768);
 const isHeaderHovered = ref(false);
-const mousePosition = ref({ x: 0, y: 0 });
+// const mousePosition = ref({ x: 0, y: 0 });
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -62,22 +62,22 @@ const handleHeaderHover = (isHovered) => {
   }
 };
 
-const handleMouseMove = (event) => {
-  if (isHeaderHovered.value) {
-    mousePosition.value = { x: event.clientX, y: event.clientY };
-  }
-};
+// const handleMouseMove = (event) => {
+//   if (isHeaderHovered.value) {
+//     mousePosition.value = { x: event.clientX, y: event.clientY };
+//   }
+// };
 
 onMounted(() => {
   document.addEventListener('click', closeDropdowns);
   window.addEventListener('resize', handleResize);
-  document.addEventListener('mousemove', handleMouseMove);
+  // document.addEventListener('mousemove', handleMouseMove);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdowns);
   window.removeEventListener('resize', handleResize);
-  document.removeEventListener('mousemove', handleMouseMove);
+  // document.removeEventListener('mousemove', handleMouseMove);
 });
 
 watch(isMobile, (newValue) => {
@@ -96,10 +96,22 @@ watch(isMobile, (newValue) => {
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
       </RouterLink>
       <nav class="desktop-nav">
-        <RouterLink to="/">홈</RouterLink>
-        <RouterLink to="/popular">지금 뜨는 콘텐츠</RouterLink>
-        <RouterLink to="/search">찾아보기</RouterLink>
-        <RouterLink to="/wishlist">내가 찜한 리스트</RouterLink>
+        <RouterLink to="/">
+          <font-awesome-icon :icon="['fas', 'house']" class="nav-icon" />
+          홈
+        </RouterLink>
+        <RouterLink to="/popular">
+          <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon" />
+          지금 뜨는 콘텐츠
+        </RouterLink>
+        <RouterLink to="/search">
+          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon" />
+          찾아보기
+        </RouterLink>
+        <RouterLink to="/wishlist">
+          <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon" />
+          내가 찜한 리스트
+        </RouterLink>
       </nav>
     </div>
     <div class="header-right">
@@ -140,10 +152,22 @@ watch(isMobile, (newValue) => {
       </template>
     </div>
     <nav>
-      <RouterLink to="/">홈</RouterLink>
-      <RouterLink to="/popular">지금 뜨는 콘텐츠</RouterLink>
-      <RouterLink to="/search">찾아보기</RouterLink>
-      <RouterLink to="/wishlist">내가 찜한 리스트</RouterLink>
+      <RouterLink to="/">
+        <font-awesome-icon :icon="['fas', 'house']" class="nav-icon" />
+        홈
+      </RouterLink>
+      <RouterLink to="/popular">
+        <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon" />
+        지금 뜨는 콘텐츠
+      </RouterLink>
+      <RouterLink to="/search">
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon" />
+        찾아보기
+      </RouterLink>
+      <RouterLink to="/wishlist">
+        <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon" />
+        내가 찜한 리스트
+      </RouterLink>
     </nav>
   </div>
 </template>
@@ -348,6 +372,15 @@ watch(isMobile, (newValue) => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+.nav-icon {
+  margin-right: 12px; /* 8px에서 12px로 증가 */
+}
+
+.desktop-nav a, .mobile-nav a {
+  display: flex;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
