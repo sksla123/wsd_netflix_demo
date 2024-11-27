@@ -6,7 +6,6 @@ import profileIcon from '../assets/profile.png';
 
 const store = useStore();
 const router = useRouter();
-
 const isLoggedIn = computed(() => store.state.isLoggedIn);
 const userEmail = computed(() => store.state.userEmail);
 
@@ -14,13 +13,15 @@ const props = defineProps({
   isLoggedIn: Boolean,
   userEmail: String
 });
+
 const emit = defineEmits(['login', 'logout'])
 
 const showMenu = ref(false);
 const showProfile = ref(false);
 const isMobile = ref(window.innerWidth <= 768);
 const isHeaderHovered = ref(false);
-// const mousePosition = ref({ x: 0, y: 0 });
+const mousePosition = ref({ x: 0, y: 0 });
+const hoveredLink = ref(null);
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -62,22 +63,28 @@ const handleHeaderHover = (isHovered) => {
   }
 };
 
-// const handleMouseMove = (event) => {
-//   if (isHeaderHovered.value) {
-//     mousePosition.value = { x: event.clientX, y: event.clientY };
-//   }
-// };
+const handleMouseMove = (event) => {
+  mousePosition.value = { x: event.clientX, y: event.clientY };
+};
+
+const handleLinkHover = (linkName) => {
+  hoveredLink.value = linkName;
+};
+
+const handleLinkLeave = () => {
+  hoveredLink.value = null;
+};
 
 onMounted(() => {
   document.addEventListener('click', closeDropdowns);
   window.addEventListener('resize', handleResize);
-  // document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mousemove', handleMouseMove);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdowns);
   window.removeEventListener('resize', handleResize);
-  // document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('mousemove', handleMouseMove);
 });
 
 watch(isMobile, (newValue) => {
@@ -89,27 +96,39 @@ watch(isMobile, (newValue) => {
 </script>
 
 <template>
-  <header class="responsive-header" :class="{ 'header-hovered': isHeaderHovered }" @mouseenter="handleHeaderHover(true)"
-    @mouseleave="handleHeaderHover(false)">
+  <header class="responsive-header" :class="{ 'header-hovered': isHeaderHovered }" 
+          @mouseenter="handleHeaderHover(true)" @mouseleave="handleHeaderHover(false)">
     <div class="header-left">
       <RouterLink to="/" class="logo">
         <img src="/netflix.png" alt="넷플릭스" class="logo-image">
       </RouterLink>
       <nav class="desktop-nav">
-        <RouterLink to="/" class="nav-link">
-          <font-awesome-icon :icon="['fas', 'house']" class="nav-icon home-icon" />
+        <RouterLink to="/" class="nav-link" 
+                    @mouseenter="handleLinkHover('home')" 
+                    @mouseleave="handleLinkLeave">
+          <font-awesome-icon :icon="['fas', 'house']" class="nav-icon home-icon" 
+                             :class="{ 'icon-hovered': hoveredLink === 'home' }" />
           홈
         </RouterLink>
-        <RouterLink to="/popular" class="nav-link">
-          <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon popular-icon" />
+        <RouterLink to="/popular" class="nav-link" 
+                    @mouseenter="handleLinkHover('popular')" 
+                    @mouseleave="handleLinkLeave">
+          <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon popular-icon" 
+                             :class="{ 'icon-hovered': hoveredLink === 'popular' }" />
           지금 뜨는 콘텐츠
         </RouterLink>
-        <RouterLink to="/search" class="nav-link">
-          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon search-icon" />
+        <RouterLink to="/search" class="nav-link" 
+                    @mouseenter="handleLinkHover('search')" 
+                    @mouseleave="handleLinkLeave">
+          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon search-icon" 
+                             :class="{ 'icon-hovered': hoveredLink === 'search' }" />
           찾아보기
         </RouterLink>
-        <RouterLink to="/wishlist" class="nav-link">
-          <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon wishlist-icon" />
+        <RouterLink to="/wishlist" class="nav-link" 
+                    @mouseenter="handleLinkHover('wishlist')" 
+                    @mouseleave="handleLinkLeave">
+          <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon wishlist-icon" 
+                             :class="{ 'icon-hovered': hoveredLink === 'wishlist' }" />
           내가 찜한 리스트
         </RouterLink>
       </nav>
@@ -135,9 +154,6 @@ watch(isMobile, (newValue) => {
       </div>
       <div class="mobile-menu" @click.stop="toggleMenu">☰</div>
     </div>
-    <div v-if="isHeaderHovered" class="ripple-container">
-      <div class="ripple" :style="{ left: mousePosition.x + 'px', top: mousePosition.y + 'px' }"></div>
-    </div>
   </header>
   <div :class="['mobile-nav', { 'show': showMenu }]">
     <div class="mobile-profile">
@@ -153,19 +169,19 @@ watch(isMobile, (newValue) => {
     </div>
     <nav>
       <RouterLink to="/">
-        <font-awesome-icon :icon="['fas', 'house']" class="nav-icon" />
+        <font-awesome-icon :icon="['fas', 'house']" class="nav-icon" style="color: orange;"/>
         홈
       </RouterLink>
       <RouterLink to="/popular">
-        <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon" />
+        <font-awesome-icon :icon="['fas', 'fire']" class="nav-icon" style="color: red;"/>
         지금 뜨는 콘텐츠
       </RouterLink>
       <RouterLink to="/search">
-        <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon" />
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="nav-icon" style="color: #0EB4FC;"/>
         찾아보기
       </RouterLink>
       <RouterLink to="/wishlist">
-        <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon" />
+        <font-awesome-icon :icon="['fas', 'basket-shopping']" class="nav-icon" style="color: yellow;"/>
         내가 찜한 리스트
       </RouterLink>
     </nav>
@@ -242,8 +258,7 @@ watch(isMobile, (newValue) => {
   object-fit: cover;
 }
 
-.profile-dropdown,
-.mobile-profile {
+.profile-dropdown, .mobile-profile {
   background: #141414;
   border: 1px solid #333;
   padding: 20px;
@@ -269,15 +284,13 @@ watch(isMobile, (newValue) => {
   margin-bottom: 10px;
 }
 
-.profile-dropdown p,
-.mobile-profile p {
+.profile-dropdown p, .mobile-profile p {
   color: white;
   margin: 10px 0;
   text-align: center;
 }
 
-.login-button,
-.logout-button {
+.login-button, .logout-button {
   background: #e50914;
   color: white;
   border: none;
@@ -331,51 +344,17 @@ watch(isMobile, (newValue) => {
   text-align: center;
 }
 
-.ripple-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translate(-50%, -50%);
-  animation: ripple-effect 1s linear infinite;
-}
-
-@keyframes ripple-effect {
-  0% {
-    width: 0;
-    height: 0;
-    opacity: 0.5;
-  }
-
-  100% {
-    width: 500px;
-    height: 500px;
-    opacity: 0;
-  }
-}
-
-.fade-enter-active,
-.fade-leave-active {
+.fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
 }
 
 .nav-icon {
-  margin-right: 12px; /* 8px에서 12px로 증가 */
+  margin-right: 12px;
 }
 
 .desktop-nav a, .mobile-nav a {
@@ -387,30 +366,23 @@ watch(isMobile, (newValue) => {
   .responsive-header {
     background: #141414;
   }
-
   .desktop-nav {
     display: none;
   }
-
   .mobile-menu {
     display: block;
   }
-
   .profile-pic {
     display: none;
   }
-
   .profile-dropdown {
     display: none;
   }
-
   .mobile-nav {
     width: 80%;
     max-width: 300px;
   }
-
-  .login-button,
-  .logout-button {
+  .login-button, .logout-button {
     width: 100px;
     height: 40px;
   }
@@ -420,5 +392,38 @@ watch(isMobile, (newValue) => {
   .mobile-nav {
     width: 80%;
   }
+}
+
+.nav-icon {
+  transition: color 3s ease;
+}
+
+.icon-hovered {
+  animation: fillColor 4s ease forwards;
+}
+
+@keyframes fillColor {
+  0% {
+    color: white;
+  }
+  100% {
+    color: var(--hover-color);
+  }
+}
+
+.home-icon {
+  --hover-color: orange;
+}
+
+.popular-icon {
+  --hover-color: red;
+}
+
+.search-icon {
+  --hover-color: #0EB4FC;
+}
+
+.wishlist-icon {
+  --hover-color: yellow;
 }
 </style>

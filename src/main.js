@@ -18,6 +18,8 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import Vue3TouchEvents from "vue3-touch-events";
 
+import './assets/css/fonts.css'
+
 library.add(fas, far, fab, faSpinner, faStar)
 
 const app = createApp(App)
