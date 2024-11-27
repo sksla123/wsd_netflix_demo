@@ -1,5 +1,67 @@
-# Vue 3 + Vite
+# 넷플릭스 데모 사이트
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+이 프로젝트는 넷플릭스에서 영감을 받은 데모 웹사이트를 제작하기입니다.
+반응형 웹사이트를 제작해보면서 관련된 능력을 습득하기 위해 시작하였습니다.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 프로젝트 설치 및 실행 가이드
+
+이 가이드는 Vite와 Vue를 사용한 영화 웹사이트 프로젝트의 설치 및 실행 과정을 설명합니다.
+
+### 사전 요구 사항
+
+- Node.js (버전 23.2 이상)
+- npm (Node.js와 함께 설치됨)
+
+### 설치 과정
+
+1. 레포지토리 클론
+   ```
+   bash
+   git clone [your-repository-url]
+   cd [your-project-name]
+   ```
+
+2. 의존성 설치
+   ```
+   bash
+   npm ci
+   ```
+
+### 개발 서버 실행
+로컬 개발 서버를 시작하려면 다음 명령어를 실행하세요:
+
+```
+bash
+npm run dev
+```
+
+이 명령어는 개발 서버를 시작하며, `http://localhost:4200`에서 프로젝트에 접근할 수 있습니다.
+localhost가 아닌 외부에서 접근하기 위해서는 포트포워딩 관련 설정이 필요할 수 있습니다.
+
+### 빌드
+
+빌드를 생성하려면 다음 명령어를 사용하세요:
+
+```
+bash
+npm run build
+```
+
+이 명령어는 `dist` 디렉토리에 최적화된 프로덕션 빌드 파일을 생성합니다.
+
+### 배포
+
+이 프로젝트는 GitHub Actions를 사용하여 자동으로 GitHub Pages에 배포됩니다. `main` 브랜치에 푸시하면 다음 과정이 자동으로 실행됩니다:
+
+1. 프로젝트 빌드
+2. 버전 계산 및 업데이트
+3. GitHub Release 생성
+4. 빌드된 파일을 GitHub Pages에 배포
+
+### 추가 정보
+
+- 이 웹사이트는 TMDB API를 사용하여 영화 정보를 가져옵니다.
+** 반드시 먼저 TMDB API를 발급받은 후 사용해주세요. **
+
+TMDB API Key를 발급받았다면 실행된 웹사이트에 접속 후 회원가입 시 비밀번호로 발급받은 API Key를 입력하세요.입력된 Key는 보안화되어 저장되지 않으니, 본인의 각별한 주의가 필요합니다. (본인의 부주의로 인한 API 유출은 책임지지 않습니다.)
+
