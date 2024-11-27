@@ -1,6 +1,6 @@
 <template>
   <div class="popular-container" :style="containerStyle">
-    <div class="view-switch">
+    <div class="view-switch animate-section">
       <button 
         class="switch-button" 
         :class="{ active: !isInfinityView }"
@@ -16,7 +16,7 @@
         <i class="pi pi-align-justify"></i>
       </button>
     </div>
-    <div class="table-wrapper">
+    <div class="table-wrapper animate-section">
       <component 
         :is="currentView"
         v-if="apiKey && baseURL"
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import PageTable from '../components/common/view/PageTable.vue';
 import InfinityScroll from '../components/common/view/InfinityScroll.vue';
@@ -59,6 +59,19 @@ const containerStyle = computed(() => ({
   height: `${props.availableHeight}px`,
   maxHeight: `${props.availableHeight}px`
 }));
+
+const animateSections = () => {
+  const sections = document.querySelectorAll('.animate-section');
+  sections.forEach((section, index) => {
+    setTimeout(() => {
+      section.classList.add('animate');
+    }, index * 200);
+  });
+};
+
+onMounted(() => {
+  animateSections();
+});
 </script>
 
 <style scoped>
@@ -126,6 +139,17 @@ const containerStyle = computed(() => ({
 .error-message p {
   font-size: 1rem;
   color: #cccccc;
+}
+
+.animate-section {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.animate-section.animate {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
