@@ -23,13 +23,52 @@
         <button @click="toggleFilter" class="filter-toggle" :class="{ active: showFilter }" :disabled="isSearchMode">필터</button>
         <button @click="resetFilterAndClose" class="filter-reset">초기화</button>
       </div>
-      <!-- 기존 필터 드롭다운 내용 -->
       <div v-if="showFilter" class="filter-dropdown">
-        <!-- 기존 필터 컨텐츠 유지 -->
+        <!-- 평점 필터 -->
+        <div class="filter-section">
+          <h3>평점: {{ star_start }} - {{ star_end }}</h3>
+          <div class="range-slider-container">
+            <div class="range-slider">
+              <div class="range-slider-track"></div>
+              <div class="range-slider-fill" :style="{ left: `${star_start * 10}%`, width: `${(star_end - star_start) * 10}%` }"></div>
+              <div class="range-slider-thumb start" :style="{ left: `${star_start * 10}%` }" @mousedown="startDrag('start')" @touchstart="startDrag('start')"></div>
+              <div class="range-slider-thumb end" :style="{ left: `${star_end * 10}%` }" @mousedown="startDrag('end')" @touchstart="startDrag('end')"></div>
+            </div>
+            <div class="range-marks">
+              <span v-for="i in 11" :key="i" class="range-mark">{{ i - 1 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 장르 필터 -->
+        <div class="filter-section">
+          <h3>장르:</h3>
+          <div class="genre-buttons">
+            <button @click="toggleGenre('all')" :class="{ active: selected_genre_ids.length === 0 }">전체</button>
+            <button v-for="genre in genres" :key="genre.id" @click="toggleGenre(genre.id)" 
+                    :class="{ active: selected_genre_ids.includes(genre.id) }">
+              {{ genre.name }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 언어 필터 -->
+        <div class="filter-section">
+          <h3>언어:</h3>
+          <div class="language-buttons">
+            <button @click="selectLanguage('ko')" :class="{ active: selectedLanguage === 'ko' }">한국어</button>
+            <button @click="selectLanguage('en')" :class="{ active: selectedLanguage === 'en' }">영어</button>
+          </div>
+        </div>
+
+        <!-- 적용 버튼 -->
+        <div class="apply-button-container">
+          <button @click="applyFilter" class="apply-button">적용</button>
+        </div>
       </div>
     </div>
 
-    <div class="container page-table-container animate-section" :class="{ 'pushed-down': showFilter }">
+    <div class="container page-table-container" :class="{ 'filter-open': showFilter }">
       <div v-if="isSearchMode && searchedMovies.length === 0" class="no-results">
         검색 결과가 없습니다.
       </div>
@@ -127,7 +166,6 @@ const performSearch = async () => {
     isSearchMode.value = true;
     showFilter.value = false;
     
-    // 검색 기록 저장
     saveSearchHistory(inputStr);
 
     const baseUrl = getBaseMovieUrl(apiKey.value, "/search/movie", '&language=ko-KR');
@@ -137,12 +175,11 @@ const performSearch = async () => {
     try {
       const movies = await getMovieDatas(finalUrl);
       searchedMovies.value = movies;
-      // 검색 완료 후 입력창 비우기
       searchQuery.value = '';
+      tableKey.value += 1; // 검색 결과 테이블 리렌더링
     } catch (error) {
       console.error('Error searching movies:', error);
       searchedMovies.value = [];
-      // 에러 발생시에도 입력창 비우기
       searchQuery.value = '';
     }
   }
@@ -259,11 +296,19 @@ const setupEventListeners = () => {
 };
 
 const applyFilter = () => {
+  showFilter.value = false; // 필터 드롭다운 닫기
   refreshTable();
 };
 
+
 const refreshTable = () => {
+  // 테이블 강제 리렌더링을 위한 키 변경
   tableKey.value += 1;
+  
+  // 검색 모드가 아닐 때만 PageTable 표시
+  if (!isSearchMode.value) {
+    searchedMovies.value = [];
+  }
 };
 
 const animateSections = () => {
@@ -450,6 +495,7 @@ button:disabled {
   color: black;
 }
 
+
 .apply-button-container {
   display: flex;
   justify-content: flex-end;
@@ -466,10 +512,11 @@ button:disabled {
 .page-table-container {
   height: 70vh;
   overflow-y: auto;
-  transition: margin-top 0.3s ease;
+  transition: none
 }
 
-.page-table-container.pushed-down {
+/* 필터가 열릴 때는 마진만 조정 */
+.filter-open {
   margin-top: 20px;
 }
 
@@ -520,13 +567,11 @@ button:disabled {
 
 .animate-section {
   opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.5s ease; /* transform 제거하고 opacity만 적용 */
 }
 
 .animate-section.animate {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1; /* transform 제거하고 opacity만 적용 */
 }
 
 @media (min-width: 769px) {
