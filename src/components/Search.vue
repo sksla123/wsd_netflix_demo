@@ -406,7 +406,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 .range-slider-container {
   width: 80%;
   max-width: 300px;
-  margin: 20px 0;
+  margin: 10px 10px;
   text-align: left;
 }
 
@@ -458,7 +458,7 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
 }
 
 button {
-  margin-right: 2px;
+  margin-right: 8px;
   margin-bottom: 10px;
   padding: 5px 10px;
   border: none;

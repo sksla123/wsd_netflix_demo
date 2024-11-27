@@ -71,7 +71,9 @@ export default {
 
     const fetchMovies = async (endpoint) => {
       const api_key = store.state.userAPIKey;
-      const url = getMovieUrl(api_key, endpoint);
+      const baseUrl = getMovieUrl(api_key, endpoint);
+      const url = addExtraQuery2MovieUrl(baseUrl, "&include_adult=false");
+      console.log(url);
       return await getMovieDatas(url);
     };
 

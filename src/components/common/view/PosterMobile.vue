@@ -204,7 +204,7 @@ onMounted(() => {
 .movie-title-mobile {
   margin-top: 5px;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   width: 100%;
   white-space: nowrap;
   overflow: hidden;
