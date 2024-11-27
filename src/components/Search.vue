@@ -1,6 +1,6 @@
 <template>
   <div class="popular-container">
-    <div class="container search-container">
+    <div class="container search-container animate-section">
       <div class="search-bar">
         <input type="text" v-model="searchQuery" placeholder="영화 검색..." @keyup.enter="performSearch" />
         <i class="pi pi-search" @click="performSearch"></i>
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="container filter-container">
+    <div class="container filter-container animate-section">
       <div class="filter-buttons">
         <button @click="toggleFilter" class="filter-toggle" :class="{ active: showFilter }" :disabled="isSearchMode">필터</button>
         <button @click="resetFilterAndClose" class="filter-reset">초기화</button>
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="container page-table-container" :class="{ 'pushed-down': showFilter }">
+    <div class="container page-table-container animate-section" :class="{ 'pushed-down': showFilter }">
       <div v-if="isSearchMode && searchedMovies.length === 0" class="no-results">
         검색 결과가 없습니다.
       </div>
@@ -73,8 +73,6 @@ const movieUrl = computed(() => {
   }
 
   url = addExtraQuery2MovieUrl(url, `&vote_average.gte=${star_start.value}&vote_average.lte=${star_end.value}`);
-
-  // console.log('Generated URL:', url);
 
   return url;
 });
@@ -122,6 +120,7 @@ const applySearchRecord = (query) => {
   searchQuery.value = query;
   performSearch();
 };
+
 const performSearch = async () => {
   const inputStr = searchQuery.value.trim();
   if (inputStr) {
@@ -267,10 +266,20 @@ const refreshTable = () => {
   tableKey.value += 1;
 };
 
+const animateSections = () => {
+  const sections = document.querySelectorAll('.animate-section');
+  sections.forEach((section, index) => {
+    setTimeout(() => {
+      section.classList.add('animate');
+    }, index * 200);
+  });
+};
+
 onMounted(() => {
   fetchGenres();
   setupEventListeners();
   loadSearchHistory();
+  animateSections();
 });
 
 // 로그인 상태 변경 감지
@@ -321,25 +330,6 @@ watch([selected_genre_ids, selectedLanguage, star_start, star_end], () => {
   cursor: pointer;
   z-index: 2;
   font-size: 16px;
-}
-
-@media (min-width: 769px) {
-  .search-bar {
-    width: 40%;
-    margin: 0 auto;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    width: 100%;
-  }
-  .search-container {
-    width: 80%;
-  }
-  .filter-dropdown {
-    width: 70% !important;
-  }
 }
 
 .filter-container {
@@ -437,7 +427,7 @@ button {
 }
 
 button:hover {
-  background-color: #333;
+  background-color: #444;
 }
 
 button.active {
@@ -471,7 +461,7 @@ button:disabled {
   border-radius: 5px;
   font-weight: bold;
   margin-bottom: 0px;
-} 
+}
 
 .page-table-container {
   height: 70vh;
@@ -510,8 +500,8 @@ button:disabled {
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid #fff; /* 테두리 추가 */
-  border-radius: 12px; /* 모서리 둥글게 */
+  border: 1px solid #fff;
+  border-radius: 12px;
 }
 
 .record-text {
@@ -526,5 +516,35 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.animate-section {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.animate-section.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (min-width: 769px) {
+  .search-bar {
+    width: 40%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+  }
+  .search-container {
+    width: 80%;
+  }
+  .filter-dropdown {
+    width: 70% !important;
+  }
 }
 </style>
