@@ -83,7 +83,7 @@ TMDB API Key를 발급받았다면 실행된 웹사이트에 접속 후 회원�
 
 <img width="263" alt="image" src="https://github.com/user-attachments/assets/9190798d-817d-44f0-bb93-6d1938ab4bcb">
 
-![image](https://github.com/user-attachments/assets/da3f1356-891c-4af2-874b-6ca33df8b0ee)
+<img width="275" alt="image" src="https://github.com/user-attachments/assets/ee550c4c-1e1a-423e-8541-063104bccb7a">
 
 로그인 배경화면에서 선들을 활용한 BackgroundAnimation을 생성하여 사용자에게 다가오는 것처럼 느끼게 했습니다.
 
@@ -97,7 +97,8 @@ TMDB API Key를 발급받았다면 실행된 웹사이트에 접속 후 회원�
 ### 회원 가입, 로그인 구현
 
 이메일 형식 여부를 검사합니다.(회원가입/로그인)
-![image](https://github.com/user-attachments/assets/3caf44c7-1498-467a-9385-4a7a27d0b681)
+<img width="327" alt="image" src="https://github.com/user-attachments/assets/d9450561-5b08-4f73-bd4b-ea6b6b31d701">
+
 
 로그인 정보를 저장하고 추후 로그인 시도 시 저장된 정보를 자동으로 구성합니다.
 <img width="236" alt="image" src="https://github.com/user-attachments/assets/7e636c09-fa2f-41cf-8c32-03d0ea77b671">
