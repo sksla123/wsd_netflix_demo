@@ -1,24 +1,26 @@
 <template>
-  <div class="home" :class="{ 'mobile': isMobile }" :style="mobileStyle">
-    <div class="banner-container">
-      <MovieBanner v-if="popularMovies.length > 0" :movie="randomPopularMovie" />
+  <div class="home-container" :class="{ 'mobile': isMobile }">
+    <div class="home" :style="mobileStyle">
+      <div class="banner-container">
+        <MovieBanner v-if="popularMovies.length > 0" :movie="randomPopularMovie" />
+      </div>
+
+      <section class="movie-section">
+        <h2>인기 영화</h2>
+        <HorizontalSlide :movies="popularMovies" />
+      </section>
+
+      <section class="movie-section">
+        <h2>현재 상영 중인 영화</h2>
+        <HorizontalSlide :movies="nowPlayingMovies" />
+      </section>
+
+      <section class="movie-section">
+        <h2>오늘의 추천 영화</h2>
+        <h3>{{ subTitle }}: {{ selectedGenre }}</h3>
+        <HorizontalSlide :movies="recommendedMovies" />
+      </section>
     </div>
-
-    <section class="movie-section">
-      <h2>인기 영화</h2>
-      <HorizontalSlide :movies="popularMovies" />
-    </section>
-
-    <section class="movie-section">
-      <h2>현재 상영 중인 영화</h2>
-      <HorizontalSlide :movies="nowPlayingMovies" />
-    </section>
-
-    <section class="movie-section">
-      <h2>오늘의 추천 영화</h2>
-      <h3>{{ subTitle }}: {{ selectedGenre }}</h3>
-      <HorizontalSlide :movies="recommendedMovies" />
-    </section>
   </div>
 </template>
 
@@ -54,9 +56,9 @@ export default {
 
     const mobileStyle = computed(() => {
       if (isMobile.value) {
-        return { maxWidth: `${props.availableWidth}px` };
+        return { width: '100%' };
       }
-      return {};
+      return { width: '80%' };
     });
 
     const randomPopularMovie = computed(() => {
@@ -171,6 +173,12 @@ export default {
 </script>
 
 <style scoped>
+.home-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .home {
   padding: 20px;
   margin-left: auto;
@@ -178,7 +186,8 @@ export default {
   overflow-x: hidden;
 }
 
-.home.mobile {
+.home-container.mobile .home {
+  width: 100%;
   padding: 15px;
 }
 
