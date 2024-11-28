@@ -77,9 +77,12 @@ const updateContainerHeight = () => {
     const { rows, columns } = grid.value;
     const totalPosters = Math.min(rows * columns, movies.value.length);
     const totalRows = Math.ceil(totalPosters / columns);
-    containerHeight.value = (totalRows * LAYOUT.poster.height) + 
+    const calculatedHeight = (totalRows * LAYOUT.poster.height) + 
                             ((totalRows - 1) * LAYOUT.spacing.gap) + 
                             (LAYOUT.spacing.padding * 2);
+    
+    // 화면 높이와 계산된 높이 중 큰 값을 선택
+    containerHeight.value = Math.max(calculatedHeight, scrollContainerHeight.value);
 };
 
 const updateContainerSize = () => {
